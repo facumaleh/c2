@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finanzas Corporativas · Clase 3 · MELI + Bonos</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0D1117;--card:#161B27;--card2:#1C2333;
+  --yellow:#FFE600;--green:#21D07A;--red:#F85149;--blue:#58A6FF;--purple:#A855F7;
+  --text:#E6EDF3;--muted:#8B949E;--border:#30363D;--radius:12px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+#navbar{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(13,17,23,0.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:100;}
+#nav-left{display:flex;align-items:center;gap:14px;}
+#nav-logo{width:28px;height:28px;background:var(--yellow);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#000;}
+#nav-title{font-size:13px;font-weight:700;color:var(--yellow);letter-spacing:.5px;text-transform:uppercase;}
+#nav-sec{font-size:12px;color:var(--muted);padding-left:14px;border-left:1px solid var(--border);}
+#nav-right{display:flex;align-items:center;gap:18px;}
+#timer-disp{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+#timer-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;}
+#timer-btn:hover{border-color:var(--yellow);color:var(--yellow);}
+#nav-cnt{font-size:13px;color:var(--text);font-variant-numeric:tabular-nums;}
+#prog{position:fixed;top:50px;left:0;height:3px;background:var(--yellow);transition:width .3s;z-index:100;}
+#slides{position:fixed;top:53px;bottom:60px;left:0;right:0;overflow:hidden;}
+.slide{position:absolute;top:0;left:0;right:0;bottom:0;padding:34px 54px;display:flex;flex-direction:column;opacity:0;transform:translateX(50px);transition:opacity .35s,transform .35s;pointer-events:none;overflow-y:auto;}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all;}
+.slide.exit{opacity:0;transform:translateX(-50px);}
+#controls{position:fixed;bottom:0;left:0;right:0;height:60px;background:rgba(13,17,23,0.97);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:12px;z-index:100;}
+.btn-nav{background:var(--card2);color:var(--text);border:1px solid var(--border);padding:9px 24px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;}
+.btn-nav:hover{border-color:var(--yellow);color:var(--yellow);}
+.btn-nav:disabled{opacity:.3;cursor:not-allowed;}
+#dots{display:flex;gap:5px;align-items:center;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--yellow);width:18px;border-radius:3px;}
+.slide-title{font-size:33px;font-weight:800;line-height:1.2;margin-bottom:6px;}
+.y{color:var(--yellow);}.g{color:var(--green);}.b{color:var(--blue);}
+.slide-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
+.badge{display:inline-block;background:rgba(255,230,0,0.12);color:var(--yellow);border:1px solid rgba(255,230,0,0.3);padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.badge-blue{background:rgba(88,166,255,0.12);color:var(--blue);border:1px solid rgba(88,166,255,0.3);}
+.badge-purple{background:rgba(168,85,247,0.12);color:var(--purple);border:1px solid rgba(168,85,247,0.3);}
+.cover-slide{justify-content:center;align-items:center;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(255,230,0,0.07) 0%,transparent 65%);}
+.cover-logo{width:86px;height:86px;background:var(--yellow);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;color:#000;margin:0 auto 26px;box-shadow:0 0 80px rgba(255,230,0,0.22);}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.kv{font-size:36px;font-weight:800;color:var(--yellow);line-height:1;font-variant-numeric:tabular-nums;}
+.kl{font-size:11px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.5px;}
+.ks{font-size:12px;color:var(--green);margin-top:3px;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--card2);color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.5px;padding:8px 10px;text-align:right;border-bottom:2px solid var(--border);}
+thead th:first-child{text-align:left;}
+tbody td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums;}
+tbody td:first-child{text-align:left;font-weight:500;}
+tbody tr:hover{background:rgba(255,255,255,0.02);}
+.hl td{color:var(--yellow);font-weight:700;background:rgba(255,230,0,0.04);}
+.hl2 td{color:var(--green);font-weight:700;background:rgba(33,208,122,0.04);}
+.pos{color:var(--green);}.neg{color:var(--red);}
+.btn-p{background:var(--yellow);color:#000;border:none;padding:9px 20px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;}
+.btn-p:hover{background:#e6cf00;}
+.btn-s{background:transparent;color:var(--text);border:1px solid var(--border);padding:9px 20px;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;}
+.btn-s:hover{border-color:var(--muted);}
+.btn-r{background:rgba(255,230,0,0.08);border:1px dashed rgba(255,230,0,0.3);color:var(--yellow);padding:8px 18px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;transition:all .2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-r:hover{background:rgba(255,230,0,0.16);}
+.bgrp{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+.formula{background:var(--card2);border:1px solid var(--border);border-left:4px solid var(--yellow);padding:13px 17px;border-radius:8px;font-size:14px;color:var(--yellow);margin:10px 0;font-family:'Courier New',monospace;}
+.formula .v{color:var(--text);}
+.disc{background:rgba(88,166,255,0.07);border:1px solid rgba(88,166,255,0.2);border-radius:8px;padding:13px 17px;margin-top:12px;}
+.disc-l{font-size:10px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.disc p{font-size:13px;color:var(--text);line-height:1.6;}
+.ans{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.ans.show{display:block;}
+.av-in{width:72px;background:rgba(255,230,0,0.07);border:1px solid rgba(255,230,0,0.25);color:var(--text);padding:5px 7px;border-radius:5px;text-align:right;font-size:13px;}
+.av-in:focus{outline:none;border-color:var(--yellow);}
+.av-in.ok{background:rgba(33,208,122,0.12);border-color:var(--green);}
+.av-in.err{background:rgba(248,81,73,0.12);border-color:var(--red);}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.tl{display:flex;margin:16px 0;}
+.tl-s{flex:1;padding:11px 8px 9px;border-top:4px solid var(--border);text-align:center;}
+.tl-s.on{border-color:var(--yellow);}
+.tl-t{font-size:10px;font-weight:700;color:var(--yellow);}
+.tl-l{font-size:11px;color:var(--text);margin-top:3px;line-height:1.3;}
+.tl-m{font-size:10px;color:var(--muted);margin-top:2px;}
+.tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;text-transform:uppercase;}
+.tg{background:rgba(33,208,122,0.18);color:var(--green);}
+.ty{background:rgba(255,230,0,0.18);color:var(--yellow);}
+.tr{background:rgba(248,81,73,0.18);color:var(--red);}
+.tb{background:rgba(88,166,255,0.18);color:var(--blue);}
+.tp{background:rgba(168,85,247,0.18);color:var(--purple);}
+/* Cajitas */
+.cajita{border-radius:10px;padding:14px;text-align:center;}
+.cajita-nof{background:rgba(88,166,255,0.12);border:2px solid rgba(88,166,255,0.3);}
+.cajita-afn{background:rgba(33,208,122,0.1);border:2px solid rgba(33,208,122,0.25);}
+.cajita-ain{background:rgba(168,85,247,0.1);border:2px solid rgba(168,85,247,0.25);}
+.cajita-otros{background:rgba(255,230,0,0.08);border:2px solid rgba(255,230,0,0.2);}
+.cajita-dfn{background:rgba(248,81,73,0.1);border:2px solid rgba(248,81,73,0.25);}
+.cajita-cp{background:rgba(33,208,122,0.1);border:2px solid rgba(33,208,122,0.25);}
+.cajita-total{background:rgba(255,230,0,0.08);border:2px solid var(--yellow);}
+.caj-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.caj-val{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;}
+.caj-desc{font-size:10px;color:var(--muted);margin-top:3px;}
+/* Bond calculator */
+.bond-input{background:var(--card2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;font-size:14px;width:100%;text-align:right;}
+.bond-input:focus{outline:none;border-color:var(--yellow);}
+.bond-result{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.bond-result-label{font-size:12px;color:var(--muted);}
+.bond-result-val{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;}
+.price-display{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums;text-align:center;padding:16px;border-radius:12px;transition:all .3s;}
+.price-par{color:var(--yellow);background:rgba(255,230,0,0.07);border:2px solid rgba(255,230,0,0.3);}
+.price-premium{color:var(--green);background:rgba(33,208,122,0.07);border:2px solid rgba(33,208,122,0.3);}
+.price-discount{color:var(--red);background:rgba(248,81,73,0.07);border:2px solid rgba(248,81,73,0.3);}
+.ytm-slider{width:100%;height:6px;border-radius:3px;-webkit-appearance:none;background:linear-gradient(to right,var(--green) 0%,var(--yellow) 50%,var(--red) 100%);cursor:pointer;margin:8px 0;}
+.ytm-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--yellow);border:2px solid #000;cursor:pointer;}
+/* Step calculator */
+.step{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--yellow);color:#000;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.step-content{flex:1;font-size:13px;}
+.step-result{font-size:14px;font-weight:700;color:var(--yellow);}
+/* NOF builder */
+.nof-item{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;}
+.nof-name{font-size:12px;font-weight:500;}
+.nof-val{font-size:12px;font-variant-numeric:tabular-nums;font-weight:700;}
+.nof-plus{color:var(--green);}
+.nof-minus{color:var(--red);}
+</style>
+</head>
+<body>
+
+<div id="navbar">
+  <div id="nav-left">
+    <div id="nav-logo">M</div>
+    <div id="nav-title">Finanzas Corporativas · Clase 3</div>
+    <div id="nav-sec">Introducción</div>
+  </div>
+  <div id="nav-right">
+    <span id="timer-disp">00:00 / 90:00</span>
+    <button id="timer-btn" onclick="toggleTimer()">▶ Iniciar</button>
+    <span id="nav-cnt">1 / 23</span>
+  </div>
+</div>
+<div id="prog" style="width:0%"></div>
+
+<div id="slides">
+
+<!-- 0: PORTADA -->
+<div class="slide cover-slide active" id="s0">
+  <div class="cover-logo">M</div>
+  <div style="font-size:48px;font-weight:800;margin-bottom:14px;">Performance <span class="y">Profunda</span> + Bonos</div>
+  <div style="font-size:18px;color:var(--muted);margin-bottom:44px;">MercadoLibre · Cajitas · NOPAT · ROIC · SodaCo Bond · YTM</div>
+  <div style="display:flex;gap:28px;justify-content:center;font-size:13px;color:var(--muted);">
+    <span>📘 Tutorial 3</span><span>⏱ 90 minutos</span>
+    <span>🏢 MELI + SodaCo</span><span>💰 USD millones</span>
+  </div>
+</div>
+
+<!-- 1: AGENDA -->
+<div class="slide" id="s1">
+  <div class="badge">Agenda</div>
+  <div class="slide-title">Plan de la clase</div>
+  <div class="slide-sub">90 minutos · Dos bloques · MELI + Bonos</div>
+  <div class="tl">
+    <div class="tl-s on"><div class="tl-t">00:00</div><div class="tl-l">Repaso &amp; Cajitas</div><div class="tl-m">15 min</div></div>
+    <div class="tl-s"><div class="tl-t">15:00</div><div class="tl-l">EBIT · EBITDA · NOPAT</div><div class="tl-m">15 min</div></div>
+    <div class="tl-s"><div class="tl-t">30:00</div><div class="tl-l">Márgenes</div><div class="tl-m">10 min</div></div>
+    <div class="tl-s"><div class="tl-t">40:00</div><div class="tl-l">ROA · ROE · ROIC</div><div class="tl-m">20 min</div></div>
+    <div class="tl-s" style="border-color:var(--blue)"><div class="tl-t" style="color:var(--blue)">60:00</div><div class="tl-l">Bonos &amp; YTM</div><div class="tl-m">25 min</div></div>
+    <div class="tl-s"><div class="tl-t">85:00</div><div class="tl-l">Cierre</div><div class="tl-m">5 min</div></div>
+  </div>
+  <div class="g2" style="margin-top:6px;">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">🎯 Bloque 1 — MELI Performance</div>
+      <div style="font-size:13px;line-height:1.7;">El <strong>"Balance Sheet Ajustado"</strong> — las cajitas financieras (NOF, AFN, AIN) que nos permiten calcular el Capital Invertido con precisión. Luego calculamos NOPAT, márgenes, ROA, ROE y ROIC.</div>
+    </div>
+    <div class="card" style="border-color:rgba(88,166,255,0.3);">
+      <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px;">💰 Bloque 2 — Bonos</div>
+      <div style="font-size:13px;line-height:1.7;"><strong>SodaCo</strong> emite un bono para financiarse. ¿Cómo lo valuamos? ¿Qué es el YTM? ¿Por qué precio y yield se mueven al revés? Calculadora interactiva incluida.</div>
+    </div>
+  </div>
+</div>
+
+<!-- 2: REPASO -->
+<div class="slide" id="s2">
+  <div class="badge">Repaso Clase 2</div>
+  <div class="slide-title">Las <span class="y">5 preguntas</span> — ¿dónde estamos?</div>
+  <div class="slide-sub">Hoy profundizamos en las preguntas 1, 2, 3 y 4 con herramientas más precisas</div>
+  <div class="g3" style="margin-bottom:14px;">
+    <div class="card" style="border-color:rgba(255,230,0,0.3);">
+      <div style="font-size:10px;color:var(--yellow);font-weight:700;text-transform:uppercase;margin-bottom:6px;">P1 + P2 · Hoy</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">¿Cuánto y en qué invertí?</div>
+      <div style="font-size:12px;color:var(--muted);">Balance Sheet Ajustado<br>Cajitas: NOF, AFN, AIN, DFN<br><span style="color:var(--yellow);">Activo Neto = Capital Invertido</span></div>
+    </div>
+    <div class="card" style="border-color:rgba(255,230,0,0.3);">
+      <div style="font-size:10px;color:var(--yellow);font-weight:700;text-transform:uppercase;margin-bottom:6px;">P3 + P4 · Hoy</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">¿Resultado y rentabilidad?</div>
+      <div style="font-size:12px;color:var(--muted);">EBIT → EBITDA → NOPAT<br>Márgenes: Bruto, Op., Neto<br><span style="color:var(--yellow);">ROA · ROE · ROIC = M × R</span></div>
+    </div>
+    <div class="card" style="border-color:rgba(88,166,255,0.3);opacity:.6;">
+      <div style="font-size:10px;color:var(--blue);font-weight:700;text-transform:uppercase;margin-bottom:6px;">P5 · Clase 2</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:6px;">¿Flujo de fondos?</div>
+      <div style="font-size:12px;color:var(--muted);">CFO − CAPEX = FCF<br>Ya cubierto en clase anterior</div>
+    </div>
+  </div>
+  <div class="card" style="border-color:rgba(255,230,0,0.2);">
+    <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:6px;">¿Qué cambia hoy respecto a clase 2?</div>
+    <div style="font-size:13px;line-height:1.7;">En clase 2 calculamos el Capital Invertido de forma <em>simplificada</em> (Net Debt + Equity). Hoy usamos el método <strong>"cajitas"</strong> que separa cada componente con precisión: NOF, AFN, AIN, y Otros. Este método es el estándar profesional — el que usan los analistas de M&A y banca de inversión.</div>
+  </div>
+</div>
+
+<!-- 3: CAJITAS -->
+<div class="slide" id="s3">
+  <div class="badge">Sección 1 · Cajitas</div>
+  <div class="slide-title">El Balance Sheet <span class="y">Ajustado</span></div>
+  <div class="slide-sub">Reorganizamos el balance contable en 6 "cajitas" financieras — mismos datos, lectura más útil</div>
+  <div style="display:grid;grid-template-columns:1fr 40px 1fr;gap:0;align-items:start;margin:8px 0;">
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px;">ACTIVO NETO (USOS)</div>
+      <div class="cajita cajita-nof"><div class="caj-title" style="color:var(--blue)">NOF</div><div style="font-size:12px;color:var(--muted);">Necesidades Operativas de Fondos</div><div style="font-size:11px;color:var(--text);margin-top:6px;">= AC Operativo − PC Operativo<br>Cuentas a cobrar + Inventario + Otros AC Op<br>− Proveedores − Acreedores − Otros PC Op</div></div>
+      <div class="cajita cajita-afn"><div class="caj-title" style="color:var(--green)">AFN</div><div style="font-size:12px;color:var(--muted);">Activo Físico Neto</div><div style="font-size:11px;color:var(--text);margin-top:6px;">= Gross PP&amp;E − Accumulated Depreciation<br>Activos fijos tangibles netos</div></div>
+      <div class="cajita cajita-ain"><div class="caj-title" style="color:var(--purple)">AIN</div><div style="font-size:12px;color:var(--muted);">Activos Intangibles Netos</div><div style="font-size:11px;color:var(--text);margin-top:6px;">= Goodwill + Other Intangibles<br>Marcas, patentes, relaciones comerciales</div></div>
+      <div class="cajita cajita-otros"><div class="caj-title" style="color:var(--yellow)">Otros Neto</div><div style="font-size:11px;color:var(--text);margin-top:4px;">Def. Tax Assets − Def. Tax Liabilities<br>+ Other LT Assets − Other LT Liabilities</div></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--yellow);padding-top:60px;">=</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:2px;">CAPITAL INVERTIDO (FUENTES)</div>
+      <div class="cajita cajita-dfn"><div class="caj-title" style="color:var(--red)">DFN</div><div style="font-size:12px;color:var(--muted);">Deuda Financiera Neta</div><div style="font-size:11px;color:var(--text);margin-top:6px;">= Pasivos Financieros − Activos Financieros<br>(Deuda bancaria + Bonos + Leases)<br>− (Cash + Inversiones financieras)</div></div>
+      <div class="cajita cajita-cp"><div class="caj-title" style="color:var(--green)">CP</div><div style="font-size:12px;color:var(--muted);">Capital Propio</div><div style="font-size:11px;color:var(--text);margin-top:6px;">= Total Equity<br>Capital aportado por los accionistas</div></div>
+      <div class="cajita cajita-total"><div class="caj-title" style="color:var(--yellow)">✓ Check</div><div style="font-size:13px;font-weight:700;color:var(--yellow);margin-top:6px;">Activo Neto = Capital Invertido</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">NOF + AFN + AIN + Otros = DFN + CP</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 4: NOF DETALLE -->
+<div class="slide" id="s4">
+  <div class="badge">Sección 1 · Cajitas</div>
+  <div class="slide-title">NOF — El <span class="y">aceite de la máquina</span></div>
+  <div class="slide-sub">Las Necesidades Operativas de Fondos: el capital que necesita el negocio para funcionar día a día</div>
+  <div class="g2">
+    <div>
+      <div class="formula">NOF = <span class="v">AC Operativo</span> − <span class="v">PC Operativo</span></div>
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px;">+ Activo Corriente Operativo</div>
+        <div style="font-size:12px;line-height:1.8;color:var(--text);">Accounts Receivable (lo que me deben clientes)<br>Notes Receivable (pagarés)<br>Inventory (stock en almacenes)<br>Prepaid Expenses (pagos adelantados)<br>Restricted Cash (cash operativo)<br>Other Current Assets (operativos)</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px;">− Pasivo Corriente Operativo</div>
+        <div style="font-size:12px;line-height:1.8;color:var(--text);">Accounts Payable (lo que debo a proveedores)<br>Accrued Expenses (gastos devengados)<br>Income Taxes Payable (impuestos a pagar)<br>Unearned Revenue (cobros anticipados)<br>Other Current Liabilities (operativos)</div>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;border-color:rgba(255,230,0,0.3);">
+        <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:10px;">¿Positivo o Negativo?</div>
+        <div style="font-size:13px;line-height:1.8;">
+          <span style="color:var(--green);">NOF &gt; 0 →</span> El negocio <strong>necesita financiamiento</strong> externo para sus operaciones.<br><br>
+          <span style="color:var(--red);">NOF &lt; 0 →</span> ¡El negocio <strong>se financia solo</strong>! Los proveedores y clientes fondean las operaciones.<br><br>
+          <span style="color:var(--yellow);">MELI 2020:</span> NOF = −$146M → sus proveedores le prestaban $146M gratis.<br>
+          <span style="color:var(--yellow);">MELI 2024:</span> NOF = +$2,928M → creció tanto que ahora necesita fondeo.
+        </div>
+      </div>
+      <div class="disc">
+        <div class="disc-l">💬 Para discutir</div>
+        <p>Amazon también tiene NOF negativo histórico. ¿Por qué las plataformas de e-commerce tienden a tener NOF negativo en sus primeras etapas? ¿Qué implica para su modelo de negocio?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5: EJERCICIO CAJITAS MELI -->
+<div class="slide" id="s5">
+  <div class="badge">Ejercicio 1 · Balance Ajustado MELI 2024</div>
+  <div class="slide-title">Construir las <span class="y">Cajitas</span> de MELI</div>
+  <div class="slide-sub">Datos reales de MELI 2024 · USD millones · Calculá cada cajita y verificá el check</div>
+  <div class="g2">
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--blue);text-transform:uppercase;margin-bottom:8px;">ACTIVO NETO</div>
+      <table style="margin-bottom:10px;">
+        <thead><tr><th>NOF — Componentes</th><th>$M</th><th>Signo</th></tr></thead>
+        <tbody>
+          <tr><td>Total Receivables</td><td>10,475</td><td class="pos">+</td></tr>
+          <tr><td>Inventory</td><td>296</td><td class="pos">+</td></tr>
+          <tr><td>Other Current Op. Assets</td><td>5,676</td><td class="pos">+</td></tr>
+          <tr><td>Accounts Payable</td><td>5,119</td><td class="neg">−</td></tr>
+          <tr><td>Other Current Op. Liabilities</td><td>8,400</td><td class="neg">−</td></tr>
+          <tr class="hl"><td><strong>= NOF</strong></td><td><input class="av-in" id="nof1" placeholder="?" onblur="chk('nof1',2928,100)"></td><td></td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>Cajita</th><th>Componentes</th><th>$M</th></tr></thead>
+        <tbody>
+          <tr><td>AFN</td><td>Net PP&amp;E</td><td><input class="av-in" id="nof2" placeholder="?" onblur="chk('nof2',2478,50)"></td></tr>
+          <tr><td>AIN</td><td>Goodwill + Intangibles</td><td><input class="av-in" id="nof3" placeholder="?" onblur="chk('nof3',161,10)"></td></tr>
+          <tr><td>Otros</td><td>Def Tax Assets LT − Def Tax Liab − Other</td><td><input class="av-in" id="nof4" placeholder="?" onblur="chk('nof4',580,30)"></td></tr>
+          <tr class="hl"><td colspan="2"><strong>= ACTIVO NETO</strong></td><td><input class="av-in" id="nof5" placeholder="?" onblur="chk('nof5',6147,100)"></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;margin-bottom:8px;">CAPITAL INVERTIDO</div>
+      <table style="margin-bottom:10px;">
+        <thead><tr><th>DFN — Componentes</th><th>$M</th><th>Signo</th></tr></thead>
+        <tbody>
+          <tr><td>Total Financial Debt</td><td>6,879</td><td class="neg">+</td></tr>
+          <tr><td>Cash &amp; ST Investments</td><td>3,695</td><td class="neg">−</td></tr>
+          <tr><td>LT Investments + Loans LT</td><td>1,388</td><td class="neg">−</td></tr>
+          <tr class="hl"><td><strong>= DFN</strong></td><td><input class="av-in" id="nof6" placeholder="?" onblur="chk('nof6',1796,50)"></td><td></td></tr>
+        </tbody>
+      </table>
+      <table>
+        <thead><tr><th>Cajita</th><th>Componentes</th><th>$M</th></tr></thead>
+        <tbody>
+          <tr><td>CP</td><td>Total Equity</td><td><input class="av-in" id="nof7" placeholder="?" onblur="chk('nof7',4351,50)"></td></tr>
+          <tr class="hl"><td colspan="2"><strong>= CAPITAL INVERTIDO</strong></td><td><input class="av-in" id="nof8" placeholder="?" onblur="chk('nof8',6147,100)"></td></tr>
+        </tbody>
+      </table>
+      <div id="nof-check" style="margin-top:10px;display:none;" class="card">
+        <div style="font-size:14px;font-weight:700;color:var(--green);">✓ Activo Neto = Capital Invertido = $6,147M</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px;">El check confirma que la clasificación es correcta.</div>
+      </div>
+      <div class="bgrp">
+        <button class="btn-p" onclick="checkCajitas()">✓ Verificar</button>
+        <button class="btn-r" onclick="revealCajitas()">👁 Mostrar respuestas</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6: RESULTADOS P&L -->
+<div class="slide" id="s6">
+  <div class="badge">Sección 2 · Resultados</div>
+  <div class="slide-title">La cascada del <span class="y">Estado de Resultados</span></div>
+  <div class="slide-sub">De ventas a utilidad neta — cada línea tiene un nombre y un significado preciso</div>
+  <div class="g2">
+    <div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="background:rgba(255,230,0,0.08);border:1px solid rgba(255,230,0,0.2);border-radius:8px;padding:12px 16px;text-align:center;font-weight:700;font-size:15px;">Ventas Netas (Revenue)</div>
+        <div style="text-align:center;color:var(--muted);font-size:13px;">− Costo de Ventas (COGS)</div>
+        <div style="background:rgba(88,166,255,0.1);border:1px solid rgba(88,166,255,0.25);border-radius:8px;padding:10px 16px;text-align:center;font-weight:700;">= <span class="b">Resultado Bruto (Gross Profit)</span></div>
+        <div style="text-align:center;color:var(--muted);font-size:13px;">− Gastos Operativos (SG&A + R&D + Otros)</div>
+        <div style="background:rgba(33,208,122,0.1);border:1px solid rgba(33,208,122,0.25);border-radius:8px;padding:10px 16px;text-align:center;font-weight:700;">= <span class="g">EBIT</span> (Resultado Operativo)</div>
+        <div style="text-align:center;color:var(--muted);font-size:13px;">+ D&A (non-cash)</div>
+        <div style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);border-radius:8px;padding:10px 16px;text-align:center;font-weight:700;">= <span style="color:var(--purple)">EBITDA</span></div>
+        <div style="text-align:center;color:var(--muted);font-size:13px;">EBIT × (1 − Tax Rate)</div>
+        <div style="background:rgba(255,230,0,0.1);border:2px solid var(--yellow);border-radius:8px;padding:10px 16px;text-align:center;font-weight:700;">= <span class="y">NOPAT</span> (Net Operating Profit After Tax)</div>
+        <div style="text-align:center;color:var(--muted);font-size:13px;">± Resultados financieros − Impuestos totales</div>
+        <div style="background:rgba(33,208,122,0.1);border:1px solid rgba(33,208,122,0.3);border-radius:8px;padding:10px 16px;text-align:center;font-weight:700;">= <span class="g">Resultado Neto (Net Income)</span></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="border-color:rgba(255,230,0,0.3);">
+        <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">¿Por qué NOPAT ≠ Net Income?</div>
+        <div style="font-size:13px;line-height:1.7;">NOPAT mide la rentabilidad <strong>operativa pura</strong>, eliminando el efecto de las decisiones de financiamiento (intereses) y resultados extraordinarios.<br><br>Net Income incluye: pérdidas por tipo de cambio, intereses, ganancias extraordinarias — todo eso <em>no depende del negocio core</em>.<br><br>Para medir si el negocio opera bien, usamos <strong>NOPAT</strong>.</div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">MELI 2024 — Diferencia</div>
+        <table>
+          <tbody>
+            <tr><td>EBIT</td><td style="text-align:right;font-weight:700;">$2,631M</td></tr>
+            <tr><td>Net Income</td><td style="text-align:right;font-weight:700;color:var(--green)">$1,911M</td></tr>
+            <tr><td>NOPAT</td><td style="text-align:right;font-weight:700;color:var(--yellow)">$2,067M</td></tr>
+            <tr><td style="font-size:11px;color:var(--muted);">Diferencia NOPAT−NI</td><td style="text-align:right;font-size:11px;color:var(--muted);">+$156M</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7: EBITDA CONCEPTO -->
+<div class="slide" id="s7">
+  <div class="badge">Sección 2 · Resultados</div>
+  <div class="slide-title">EBITDA — ¿Qué es y para qué sirve?</div>
+  <div class="slide-sub">Earnings Before Interest, Taxes, Depreciation and Amortization</div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="border-color:rgba(168,85,247,0.3);">
+        <div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px;">Definición</div>
+        <div style="font-size:13px;line-height:1.7;">Capacidad de generar dinero con el <strong>giro principal del negocio</strong>, independientemente de:<br>• la estructura financiera (intereses)<br>• el plan de inversiones (D&A)<br>• la carga fiscal (impuestos)<br><br>Sirve para <strong>comparar empresas</strong> con diferentes estructuras de capital, activos o jurisdicciones fiscales.</div>
+      </div>
+      <div class="card">
+        <div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:8px;">Proxy de caja en el corto plazo</div>
+        <div style="font-size:13px;line-height:1.7;">EBITDA ≈ cash operativo generado antes de inversiones y deuda. Por eso los analistas usan múltiplos como <strong>EV/EBITDA</strong> para valuar empresas.</div>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:12px;">La Matriz 2×2</div>
+        <table>
+          <thead>
+            <tr><th></th><th>Con D&A</th><th>Sin D&A</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Antes imp. operativo</td><td style="text-align:center;"><span class="tag tg">EBIT</span></td><td style="text-align:center;"><span class="tag tp">EBITDA</span></td></tr>
+            <tr><td>Después imp. operativo</td><td style="text-align:center;"><span class="tag ty">NOPAT</span></td><td style="text-align:center;"><span class="tag tb">Flujo Bruto</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">MELI · Evolución EBITDA</div>
+        <table>
+          <thead><tr><th></th><th>2021</th><th>2022</th><th>2023</th><th>2024</th></tr></thead>
+          <tbody>
+            <tr><td>EBIT ($M)</td><td>450</td><td>1,081</td><td>2,207</td><td>2,631</td></tr>
+            <tr><td>+ D&A ($M)</td><td>204</td><td>403</td><td>524</td><td>617</td></tr>
+            <tr class="hl"><td>= EBITDA ($M)</td><td>654</td><td>1,484</td><td>2,731</td><td>3,248</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 8: EJERCICIO NOPAT -->
+<div class="slide" id="s8">
+  <div class="badge">Ejercicio 2 · NOPAT Step by Step</div>
+  <div class="slide-title">Calcular el <span class="y">NOPAT</span> de MELI 2024</div>
+  <div class="slide-sub">Paso a paso usando datos reales del Income Statement · USD millones</div>
+  <div class="g2">
+    <div>
+      <div class="step"><div class="step-num">1</div><div class="step-content"><strong>EBIT (dado)</strong> — Resultado Operativo<br><span class="step-result">$2,631M</span></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-content"><strong>EBT</strong> — Earnings Before Taxes (dado)<br><span class="step-result">$2,432M</span></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-content"><strong>Income Tax Expense</strong> (dado)<br><span class="step-result">$521M</span></div></div>
+      <div class="step"><div class="step-num">4</div>
+        <div class="step-content">
+          <strong>Tasa impositiva efectiva</strong> = Tax / EBT<br>
+          = 521 / 2,432 = <input class="av-in" id="np1" placeholder="?%" onblur="chkPct('np1',21.4,1)" style="width:65px;">
+        </div>
+      </div>
+      <div class="step"><div class="step-num">5</div>
+        <div class="step-content">
+          <strong>Impuesto operativo</strong> = EBIT × Tax Rate<br>
+          = 2,631 × 21.4% = <input class="av-in" id="np2" placeholder="?$M" onblur="chk('np2',563,20)" style="width:65px;">
+        </div>
+      </div>
+      <div class="step"><div class="step-num">6</div>
+        <div class="step-content">
+          <strong>NOPAT</strong> = EBIT − Impuesto Operativo<br>
+          = 2,631 − 563 = <input class="av-in" id="np3" placeholder="?$M" onblur="chk('np3',2068,50)" style="width:75px;">
+        </div>
+      </div>
+      <div class="bgrp">
+        <button class="btn-p" onclick="checkNOPAT()">✓ Verificar</button>
+        <button class="btn-r" onclick="revealNOPAT()">👁 Respuestas</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="border-color:rgba(255,230,0,0.3);">
+        <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">¿Por qué NOPAT &gt; Net Income?</div>
+        <div style="font-size:13px;line-height:1.7;">
+          NOPAT ($2,067M) &gt; Net Income ($1,911M)<br><br>
+          La diferencia ($156M) se explica por:<br>
+          • Currency losses: −$182M (devaluación Argentina/Brasil)<br>
+          • Net Interest: −$85M (pago de intereses neto)<br>
+          • Otros resultados financieros: +$111M<br><br>
+          NOPAT <em>ignora</em> estos efectos financieros y cambiarios para medir únicamente qué tan bien opera el negocio.
+        </div>
+      </div>
+      <div id="nopat-ans" class="ans">
+        <div class="card" style="background:rgba(33,208,122,0.05);border-color:rgba(33,208,122,0.3);">
+          <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px;">✓ NOPAT 2024 = $2,067M</div>
+          <div style="font-size:12px;color:var(--muted);">Tax rate efectiva: 21.4% · Impuesto op: $564M · NOPAT = $2,631M − $564M = $2,067M</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9: MÁRGENES -->
+<div class="slide" id="s9">
+  <div class="badge">Sección 3 · Márgenes</div>
+  <div class="slide-title">Los <span class="y">3 márgenes</span> del negocio</div>
+  <div class="slide-sub">Cada margen mide la rentabilidad en un nivel diferente de la cascada de resultados</div>
+  <div class="g3" style="margin-bottom:14px;">
+    <div class="card" style="border-color:rgba(88,166,255,0.3);">
+      <div style="font-size:11px;color:var(--blue);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Margen Bruto</div>
+      <div class="formula" style="font-size:13px;margin:8px 0;">MB = <span class="v">Gross Profit / Revenue</span></div>
+      <div style="font-size:12px;line-height:1.6;">Mide la rentabilidad <strong>antes de gastos operativos</strong>. Refleja el pricing power y la eficiencia productiva.</div>
+    </div>
+    <div class="card" style="border-color:rgba(33,208,122,0.3);">
+      <div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Margen Operativo</div>
+      <div class="formula" style="font-size:13px;margin:8px 0;">MO = <span class="v">EBIT / Revenue</span></div>
+      <div style="font-size:12px;line-height:1.6;">Mide la rentabilidad del <strong>negocio operativo puro</strong>. Incluye todos los gastos operativos (SG&A, R&D).</div>
+    </div>
+    <div class="card" style="border-color:rgba(255,230,0,0.3);">
+      <div style="font-size:11px;color:var(--yellow);font-weight:700;text-transform:uppercase;margin-bottom:6px;">Margen Neto</div>
+      <div class="formula" style="font-size:13px;margin:8px 0;">MN = <span class="v">Net Income / Revenue</span></div>
+      <div style="font-size:12px;line-height:1.6;">Rentabilidad <strong>final para el accionista</strong>. Incluye efectos financieros, cambiarios e impositivos.</div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>Margen</th><th>2020</th><th>2021</th><th>2022</th><th>2023</th><th>2024</th><th>Tendencia</th></tr></thead>
+    <tbody>
+      <tr><td>Gross Margin</td><td>51.2%</td><td>50.6%</td><td>55.8%</td><td>58.0%</td><td class="neg">52.7%</td><td>↑↑ luego ↓ (mix Fintech)</td></tr>
+      <tr><td>EBIT Margin</td><td>3.2%</td><td>6.4%</td><td>10.0%</td><td>14.6%</td><td class="neg">12.7%</td><td>↑↑↑ luego leve ↓</td></tr>
+      <tr class="hl"><td>Net Margin</td><td class="neg">-0.0%</td><td>1.2%</td><td>4.5%</td><td>6.5%</td><td class="pos">9.2%</td><td>↑↑↑↑ consistente</td></tr>
+    </tbody>
+  </table>
+  <div class="disc">
+    <div class="disc-l">💬 La paradoja de MELI 2024</div>
+    <p>El Gross Margin cayó (58% → 52.7%) pero el Net Margin subió (6.5% → 9.2%). ¿Cómo es posible? La respuesta: mejor eficiencia fiscal (tax rate bajó de 37% a 21%) y menores pérdidas cambiarias vs. 2023 ($615M en 2023 vs. $182M en 2024). El negocio operativo se comprimió pero el bottom line mejoró. ¿Eso es sostenible?</p>
+  </div>
+</div>
+
+<!-- 10: RATIOS INTRO -->
+<div class="slide" id="s10">
+  <div class="badge">Sección 4 · Ratios</div>
+  <div class="slide-title">Ratios de <span class="y">Rentabilidad</span></div>
+  <div class="slide-sub">Conectan el resultado con el capital — ¿cuánto ganás por cada $ invertido?</div>
+  <div class="g3" style="margin-bottom:14px;">
+    <div class="card" style="border-color:rgba(88,166,255,0.3);">
+      <div style="font-size:11px;color:var(--blue);font-weight:700;text-transform:uppercase;margin-bottom:6px;">ROA</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Return on Assets</div>
+      <div class="formula" style="font-size:12px;margin:8px 0;">ROA = <span class="v">EBIT / Total Assets</span></div>
+      <div style="font-size:12px;line-height:1.5;color:var(--muted);">Rentabilidad sobre <strong>todos los recursos</strong> de la empresa (operativos + financieros). Mide qué tan bien usa todos sus activos.</div>
+    </div>
+    <div class="card" style="border-color:rgba(33,208,122,0.3);">
+      <div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;margin-bottom:6px;">ROE</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Return on Equity</div>
+      <div class="formula" style="font-size:12px;margin:8px 0;">ROE = <span class="v">Net Income / Equity</span></div>
+      <div style="font-size:12px;line-height:1.5;color:var(--muted);">Rentabilidad <strong>del accionista</strong>. Incluye el efecto palanca (leverage): a mayor deuda, mayor ROE potencial — y mayor riesgo.</div>
+    </div>
+    <div class="card" style="border-color:rgba(255,230,0,0.3);">
+      <div style="font-size:11px;color:var(--yellow);font-weight:700;text-transform:uppercase;margin-bottom:6px;">ROIC</div>
+      <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Return on Inv. Capital</div>
+      <div class="formula" style="font-size:12px;margin:8px 0;">ROIC = <span class="v">NOPAT / Activo Neto</span></div>
+      <div style="font-size:12px;line-height:1.5;color:var(--muted);">Rentabilidad <strong>del negocio operativo</strong>. Independiente de la estructura de capital. La mejor medida de performance.</div>
+    </div>
+  </div>
+  <div class="card" style="border-color:rgba(255,230,0,0.2);">
+    <table>
+      <thead><tr><th>Ratio</th><th>Numerador</th><th>Denominador</th><th>¿Qué mide?</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tb">ROA</span></td><td>EBIT</td><td>Total Assets</td><td>Eficiencia de todos los activos</td></tr>
+        <tr><td><span class="tag tg">ROE</span></td><td>Net Income</td><td>Total Equity</td><td>Retorno al accionista</td></tr>
+        <tr><td><span class="tag ty">ROIC</span></td><td>NOPAT</td><td>Activo Neto</td><td>Rentabilidad operativa pura</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 11: ROIC DESCOMPOSICION -->
+<div class="slide" id="s11">
+  <div class="badge">Sección 4 · Ratios</div>
+  <div class="slide-title">ROIC = <span class="y">Margen × Rotación</span></div>
+  <div class="slide-sub">La descomposición DuPont del ROIC — dos palancas para crear valor</div>
+  <div class="g2" style="margin-bottom:14px;">
+    <div>
+      <div class="formula" style="font-size:15px;">
+        ROIC = <span class="v">NOPAT/Revenue</span> × <span class="v">Revenue/Activo Neto</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;= <span class="v">Margen NOPAT</span> × <span class="v">Rotación</span>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:14px;">
+        <div class="card" style="flex:1;border-color:rgba(255,230,0,0.3);">
+          <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:6px;text-transform:uppercase;">Palanca 1: Margen</div>
+          <div style="font-size:24px;font-weight:800;">NOPAT/Rev</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">¿Cuánto gano por cada $1 vendido?<br>Alta en luxe, pharma, software.</div>
+        </div>
+        <div style="display:flex;align-items:center;font-size:24px;color:var(--yellow);">×</div>
+        <div class="card" style="flex:1;border-color:rgba(88,166,255,0.3);">
+          <div style="font-size:12px;font-weight:700;color:var(--blue);margin-bottom:6px;text-transform:uppercase;">Palanca 2: Rotación</div>
+          <div style="font-size:24px;font-weight:800;">Rev/AN</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">¿Cuántas veces "roto" el capital?<br>Alta en supermercados, e-commerce.</div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Año</th><th>NOPAT Margin</th><th>Rotación (×)</th><th>ROIC</th></tr></thead>
+        <tbody>
+          <tr><td>2020</td><td class="neg">-0.04%</td><td>5.55×</td><td class="neg">-0.2%</td></tr>
+          <tr><td>2021</td><td>2.28%</td><td>2.74×</td><td>6.2%</td></tr>
+          <tr><td>2022</td><td>6.20%</td><td>2.77×</td><td>17.2%</td></tr>
+          <tr><td>2023</td><td>9.27%</td><td>3.40×</td><td>31.5%</td></tr>
+          <tr class="hl"><td>2024</td><td>9.95%</td><td>3.38×</td><td>33.6%</td></tr>
+        </tbody>
+      </table>
+      <div class="disc" style="margin-top:12px;">
+        <div class="disc-l">💬 La historia del ROIC de MELI</div>
+        <p>MELI mejoró el ROIC por <strong>dos vías simultáneas</strong>: el margen creció 10× (de -0.04% a 9.95%) y la rotación también mejoró. Esto es raro — lo normal es que haya trade-off. El secreto: el negocio fintech (Mercado Pago) tiene márgenes crecientes y genera ingresos sobre el mismo capital físico.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 12: EJERCICIO RATIOS -->
+<div class="slide" id="s12">
+  <div class="badge">Ejercicio 3 · Calcular Ratios MELI 2024</div>
+  <div class="slide-title">ROA · ROE · ROIC para <span class="y">MELI 2024</span></div>
+  <div class="slide-sub">Usá los datos del Income Statement y Balance Sheet · Verificá ROIC por dos métodos</div>
+  <div class="g2">
+    <div>
+      <table>
+        <thead><tr><th>Datos disponibles</th><th>$M</th></tr></thead>
+        <tbody>
+          <tr><td>EBIT</td><td>2,631</td></tr>
+          <tr><td>NOPAT</td><td>2,067</td></tr>
+          <tr><td>Net Income</td><td>1,911</td></tr>
+          <tr><td>Total Revenue</td><td>20,777</td></tr>
+          <tr><td>Total Assets</td><td>25,196</td></tr>
+          <tr><td>Total Equity</td><td>4,351</td></tr>
+          <tr><td>Activo Neto (cajitas)</td><td>6,147</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <table>
+        <thead><tr><th>Ratio</th><th>Fórmula</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag tb">ROA</span></td><td>2,631 / 25,196</td><td><input class="av-in" id="r1" placeholder="?%" onblur="chkPct('r1',10.44,0.5)"></td></tr>
+          <tr><td><span class="tag tg">ROE</span></td><td>1,911 / 4,351</td><td><input class="av-in" id="r2" placeholder="?%" onblur="chkPct('r2',43.92,1)"></td></tr>
+          <tr><td><span class="tag ty">ROIC</span></td><td>2,067 / 6,147</td><td><input class="av-in" id="r3" placeholder="?%" onblur="chkPct('r3',33.63,1)"></td></tr>
+          <tr><td style="font-size:11px;color:var(--muted);">Margen NOPAT</td><td>2,067 / 20,777</td><td><input class="av-in" id="r4" placeholder="?%" onblur="chkPct('r4',9.95,0.5)"></td></tr>
+          <tr><td style="font-size:11px;color:var(--muted);">Rotación</td><td>20,777 / 6,147</td><td><input class="av-in" id="r5" placeholder="?×" onblur="chkRot('r5',3.38)"></td></tr>
+          <tr class="hl"><td>ROIC (M×R)</td><td>Margen × Rotación</td><td><input class="av-in" id="r6" placeholder="?%" onblur="chkPct('r6',33.63,1)"></td></tr>
+        </tbody>
+      </table>
+      <div class="bgrp">
+        <button class="btn-p" onclick="checkRatios()">✓ Verificar</button>
+        <button class="btn-r" onclick="revealRatios()">👁 Respuestas</button>
+      </div>
+      <div id="ratio-ans" class="ans">
+        <div class="card" style="background:rgba(33,208,122,0.04);border-color:rgba(33,208,122,0.3);">
+          <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px;">✓ MELI 2024 — Ratios confirmados</div>
+          <div style="font-size:12px;color:var(--muted);">ROA 10.44% · ROE 43.92% · ROIC 33.63% = 9.95% × 3.38× ✓</div>
+          <div style="font-size:12px;margin-top:6px;">Con WACC ≈ 12%: <span style="color:var(--yellow);font-weight:700;">ROIC (33.63%) >> WACC → MELI crea valor económico masivo</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 13: SINTESIS MELI -->
+<div class="slide" id="s13">
+  <div class="badge">Síntesis · Performance MELI</div>
+  <div class="slide-title">MELI 2024 — <span class="y">Cuadro completo</span></div>
+  <div class="slide-sub">Las 5 preguntas respondidas con el framework completo de cajitas</div>
+  <div class="g2" style="margin-bottom:12px;">
+    <div>
+      <table>
+        <thead><tr><th>Pregunta</th><th>Métrica</th><th>2023</th><th>2024</th></tr></thead>
+        <tbody>
+          <tr><td>P1 ¿Cuánto invertí?</td><td>Capital Invertido</td><td>$4,448M</td><td class="pos">$6,147M</td></tr>
+          <tr><td>P2 ¿En qué?</td><td>NOF / AFN / AIN</td><td>1,715/2,149/174</td><td>2,928/2,478/161</td></tr>
+          <tr><td>P3 ¿Resultado?</td><td>EBIT / NOPAT / NI</td><td>2,207/1,400/987</td><td class="pos">2,631/2,067/1,911</td></tr>
+          <tr><td>P4a ¿ROA?</td><td>EBIT / Assets</td><td>12.5%</td><td class="neg">10.4%</td></tr>
+          <tr><td>P4b ¿ROE?</td><td>NI / Equity</td><td>32.1%</td><td class="pos">43.9%</td></tr>
+          <tr class="hl"><td>P4c ¿ROIC?</td><td>NOPAT / AN</td><td>31.5%</td><td>33.6%</td></tr>
+          <tr><td>P5 ¿Cash?</td><td>CFO / FCF</td><td>5,140/4,631</td><td class="pos">7,918/7,058</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="card" style="border-color:rgba(33,208,122,0.3);">
+        <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px;">Veredicto: MELI crea valor masivo</div>
+        <div style="font-size:13px;line-height:1.7;">ROIC 33.6% vs. WACC ~12%: spread de +21.6%.<br>Capital Invested $6.1B → EVA ≈ $1.3B/año.<br>ROE 43.9%: retorno excepcional al accionista.<br>FCF $7B: genera caja a ritmo acelerado.</div>
+      </div>
+      <div class="disc">
+        <div class="disc-l">💬 Pregunta de cierre del bloque MELI</div>
+        <p>El Capital Invertido creció +38% en 2024 (principalmente cartera de créditos de Mercado Pago). Si el ROIC se mantiene en 33.6%, ¿cuánto valor adicional crea ese nuevo capital? ¿Qué pasaría si los créditos empiezan a generar altas tasas de impago?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 14: BONOS INTRO -->
+<div class="slide" id="s14">
+  <div class="badge badge-blue">Sección 5 · Bonos</div>
+  <div class="slide-title">¿Cómo se <span class="b">financia</span> una empresa?</div>
+  <div class="slide-sub">Introducción al mercado de deuda — el otro lado del Capital Invertido</div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card" style="border-color:rgba(88,166,255,0.3);">
+        <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:8px;">¿Qué es un bono?</div>
+        <div style="font-size:13px;line-height:1.7;">Un bono es un <strong>contrato de deuda</strong>: la empresa (emisor) toma dinero prestado del mercado comprometiéndose a:<br><br>
+        1. Pagar <strong>cupones</strong> (intereses) periódicos<br>
+        2. Devolver el <strong>principal</strong> al vencimiento<br><br>
+        Es lo opuesto a la acción: el bonista es acreedor, no dueño. Tiene prioridad de cobro pero no participa en las ganancias.</div>
+      </div>
+      <div class="card">
+        <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">El caso SodaCo</div>
+        <div style="font-size:13px;line-height:1.7;">SodaCo es una empresa de consumo masivo que compite en los mercados de MELI. Para financiar su expansión, emite bonos en el mercado. Como inversor (analista de MELI), ¿deberías comprarlos?</div>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;gap:16px;margin-bottom:14px;">
+        <div class="card" style="flex:1;text-align:center;border-color:rgba(33,208,122,0.3);">
+          <div style="font-size:28px;margin-bottom:6px;">💵</div>
+          <div style="font-size:13px;font-weight:700;">Acción (Equity)</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Sos dueño<br>Ganás si sube<br>Riesgo ilimitado</div>
+        </div>
+        <div class="card" style="flex:1;text-align:center;border-color:rgba(88,166,255,0.3);">
+          <div style="font-size:28px;margin-bottom:6px;">📋</div>
+          <div style="font-size:13px;font-weight:700;">Bono (Deuda)</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">Sos acreedor<br>Cupones fijos<br>Cobrás primero</div>
+        </div>
+      </div>
+      <div class="disc">
+        <div class="disc-l">💬 Conexión con lo anterior</div>
+        <p>En el Capital Invertido de MELI hay $6.9B de <strong>deuda financiera</strong>. Parte de esa deuda son bonos emitidos en el mercado. El costo de esa deuda determina el WACC, que a su vez determina si el ROIC de 33.6% crea valor o no. Hoy aprendemos a valuar exactamente ese tipo de instrumentos.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 15: CONCEPTOS CLAVE BONOS -->
+<div class="slide" id="s15">
+  <div class="badge badge-blue">Sección 5 · Bonos</div>
+  <div class="slide-title">Conceptos <span class="b">clave</span></div>
+  <div class="slide-sub">Glosario esencial antes de resolver el caso SodaCo</div>
+  <div class="g2">
+    <div>
+      <table>
+        <thead><tr><th>Término</th><th>Significado</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Par / Face Value</strong></td><td>Monto que el emisor devuelve al vencimiento (conv: $1,000)</td></tr>
+          <tr><td><strong>Coupon Rate</strong></td><td>Tasa anual de interés fijada al emitir (APR, sobre el par)</td></tr>
+          <tr><td><strong>PMT</strong></td><td>Cupón por período = Par × Coupon / Frecuencia</td></tr>
+          <tr><td><strong>Maturity</strong></td><td>Fecha en que vence y se devuelve el principal</td></tr>
+          <tr><td><strong>Precio (Price)</strong></td><td>Lo que el inversor paga hoy — puede ≠ Par</td></tr>
+          <tr class="hl"><td><strong>YTM</strong></td><td>Yield to Maturity — TIR de todos los flujos prometidos</td></tr>
+          <tr><td><strong>BEY</strong></td><td>Bond Equivalent Yield — APR (tasa periódica × frecuencia)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;border-color:rgba(88,166,255,0.3);">
+        <div style="font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px;">Las 3 Reglas de Oro</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:rgba(248,81,73,0.1);border:1px solid rgba(248,81,73,0.3);border-radius:6px;padding:10px;">
+            <span class="tag tr">Yield &gt; Cupón</span> <span style="font-size:13px;margin-left:6px;">→ Precio &lt; Par</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">DESCUENTO: el bono vale menos que su par</div>
+          </div>
+          <div style="background:rgba(255,230,0,0.08);border:1px solid rgba(255,230,0,0.25);border-radius:6px;padding:10px;">
+            <span class="tag ty">Yield = Cupón</span> <span style="font-size:13px;margin-left:6px;">→ Precio = Par</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">A LA PAR: el bono vale exactamente $1,000</div>
+          </div>
+          <div style="background:rgba(33,208,122,0.08);border:1px solid rgba(33,208,122,0.25);border-radius:6px;padding:10px;">
+            <span class="tag tg">Yield &lt; Cupón</span> <span style="font-size:13px;margin-left:6px;">→ Precio &gt; Par</span>
+            <div style="font-size:11px;color:var(--muted);margin-top:3px;">PRIMA: el bono vale más que su par</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 16: SODACO BASE -->
+<div class="slide" id="s16">
+  <div class="badge badge-blue">Sección 5 · Bonos</div>
+  <div class="slide-title">SodaCo — <span class="b">Caso Base</span></div>
+  <div class="slide-sub">SodaCo emite un bono: $1,000 par · 6% cupón semi-anual · 3 años · Precio = $1,000</div>
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Parámetros del Bono</div>
+        <table>
+          <tbody>
+            <tr><td>Principal (Par)</td><td style="text-align:right;font-weight:700;">$1,000</td></tr>
+            <tr><td>Precio de compra</td><td style="text-align:right;font-weight:700;">$1,000</td></tr>
+            <tr><td>Coupon Rate (anual)</td><td style="text-align:right;font-weight:700;">6.00%</td></tr>
+            <tr><td>Pagos por año</td><td style="text-align:right;font-weight:700;">2 (semi-anual)</td></tr>
+            <tr><td>Años a madurez</td><td style="text-align:right;font-weight:700;">3</td></tr>
+            <tr><td>N° períodos (n)</td><td style="text-align:right;font-weight:700;">6</td></tr>
+            <tr class="hl"><td>PMT por período</td><td style="text-align:right;font-weight:700;">$30</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="formula" style="font-size:13px;">PMT = Par × Cupón / Frecuencia<br>= <span class="v">$1,000 × 6% / 2 = $30</span></div>
+    </div>
+    <div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Flujos Prometidos al Bonista</div>
+        <table>
+          <thead><tr><th>Período</th><th>Flujo</th><th>Descripción</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td class="neg">-$1,000</td><td style="text-align:left;">Inversión inicial</td></tr>
+            <tr><td>1</td><td class="pos">+$30</td><td style="text-align:left;">Cupón semi-anual</td></tr>
+            <tr><td>2</td><td class="pos">+$30</td><td style="text-align:left;">Cupón semi-anual</td></tr>
+            <tr><td>3</td><td class="pos">+$30</td><td style="text-align:left;">Cupón semi-anual</td></tr>
+            <tr><td>4</td><td class="pos">+$30</td><td style="text-align:left;">Cupón semi-anual</td></tr>
+            <tr><td>5</td><td class="pos">+$30</td><td style="text-align:left;">Cupón semi-anual</td></tr>
+            <tr class="hl"><td>6</td><td class="pos">+$1,030</td><td style="text-align:left;">Cupón + Principal</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>$1,180</strong></td><td style="text-align:left;font-size:11px;color:var(--muted);">$180 en intereses</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 17: CALCULADORA YTM -->
+<div class="slide" id="s17">
+  <div class="badge badge-blue">Calculadora Interactiva</div>
+  <div class="slide-title">Calculadora <span class="b">YTM</span></div>
+  <div class="slide-sub">Modificá las celdas azules para explorar cualquier escenario — todo se recalcula automáticamente</div>
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">📝 Parámetros del Bono</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Par ($)</div><input class="bond-input" id="b-par" value="1000" oninput="calcBond()"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Coupon Rate (%)</div><input class="bond-input" id="b-coup" value="6" oninput="calcBond()"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Pagos/año</div><input class="bond-input" id="b-freq" value="2" oninput="calcBond()"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Años</div><input class="bond-input" id="b-yrs" value="3" oninput="calcBond()"></div>
+          <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Precio de Compra ($)</div><input class="bond-input" id="b-price" value="1000" oninput="calcBondFromPrice()"></div>
+        </div>
+        <div style="margin-top:12px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">YTM objetivo (%) — deslizá para ver el precio justo</div>
+          <input type="range" class="ytm-slider" id="b-ytm-slider" min="0.5" max="20" step="0.1" value="6.09" oninput="calcFromYTM()">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:2px;"><span>0.5%</span><span id="ytm-slider-val" style="color:var(--yellow);font-weight:700;">6.09%</span><span>20%</span></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div id="price-display" class="price-display price-par" style="margin-bottom:12px;">$1,000.00</div>
+      <div id="bond-type-badge" style="text-align:center;margin-bottom:12px;"><span class="tag ty">A LA PAR</span></div>
+      <div class="bond-result"><span class="bond-result-label">N° Períodos (n)</span><span class="bond-result-val" id="br-n">6</span></div>
+      <div class="bond-result"><span class="bond-result-label">PMT por período</span><span class="bond-result-val" id="br-pmt">$30.00</span></div>
+      <div class="bond-result"><span class="bond-result-label">Tasa periódica</span><span class="bond-result-val" id="br-rper">3.00%</span></div>
+      <div class="bond-result"><span class="bond-result-label">YTM Efectivo Anual</span><span class="bond-result-val" id="br-ytm" style="color:var(--yellow)">6.09%</span></div>
+      <div class="bond-result"><span class="bond-result-label">BEY (APR convención)</span><span class="bond-result-val" id="br-bey">6.00%</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 18: YTM vs BEY -->
+<div class="slide" id="s18">
+  <div class="badge badge-blue">Sección 5 · Bonos</div>
+  <div class="slide-title">YTM vs BEY — El efecto del <span class="b">compounding</span></div>
+  <div class="slide-sub">¿Por qué el YTM efectivo (6.09%) es mayor que el cupón (6%)? El interés compuesto</div>
+  <div class="g2">
+    <div>
+      <div class="formula" style="font-size:14px;">
+        Tasa periódica = <span class="v">RATE(6, 30, -1000, 1000)</span> = <span style="color:var(--green);">3.00%</span><br><br>
+        BEY = <span class="v">3.00% × 2</span> = <span style="color:var(--blue);">6.00%</span> (APR, sin capitalizar)<br><br>
+        YTM = <span class="v">(1 + 3%)² − 1</span> = <span style="color:var(--yellow);">6.09%</span> (efectivo anual)
+      </div>
+      <div class="card" style="margin-top:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">¿Por qué difieren?</div>
+        <div style="font-size:13px;line-height:1.7;">El <strong>BEY</strong> simplemente multiplica: 3% × 2 = 6% — ignora que el cupón de período 1 puede <em>reinvertirse</em> y generar rendimiento adicional.<br><br>El <strong>YTM efectivo</strong> capitaliza: (1+3%)² − 1 = 6.09% — asume que cada cupón se reinvierte a la misma tasa.<br><br>Regla: YTM efectivo siempre ≥ BEY. La diferencia crece con la frecuencia.</div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Impacto de la frecuencia (cupón 6% fijo)</div>
+      <table>
+        <thead><tr><th>Frecuencia</th><th>Pagos/año</th><th>PMT</th><th>BEY</th><th>YTM Efectivo</th></tr></thead>
+        <tbody>
+          <tr><td>Anual</td><td>1</td><td>$60</td><td>6.00%</td><td>6.00%</td></tr>
+          <tr class="hl"><td>Semi-anual</td><td>2</td><td>$30</td><td>6.00%</td><td class="pos">6.09%</td></tr>
+          <tr><td>Trimestral</td><td>4</td><td>$15</td><td>6.00%</td><td class="pos">6.14%</td></tr>
+          <tr><td>Mensual</td><td>12</td><td>$5</td><td>6.00%</td><td class="pos">6.17%</td></tr>
+        </tbody>
+      </table>
+      <div class="disc" style="margin-top:12px;">
+        <div class="disc-l">💬 Relevancia para Argentina</div>
+        <p>En Argentina, muchos instrumentos pagan cupones <strong>mensualmente</strong>. Cuando leen "TNA 120%", están viendo el BEY, no el efectivo. La TEM (tasa efectiva mensual) capitalizada da el rendimiento real. Con alta inflación, esta diferencia puede ser enorme.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 19: PRECIO-YIELD CHART -->
+<div class="slide" id="s19">
+  <div class="badge badge-blue">Sección 5 · Bonos</div>
+  <div class="slide-title">Relación <span class="b">Precio–Yield</span></div>
+  <div class="slide-sub">La relación inversa fundamental — cuando yield sube, precio baja (y viceversa)</div>
+  <div class="g2">
+    <div>
+      <div class="ch-wrap" style="height:320px;"><canvas id="chartPY"></canvas></div>
+    </div>
+    <div>
+      <table style="margin-bottom:12px;">
+        <thead><tr><th>YTM Efectivo</th><th>Precio</th><th>vs Par</th><th>Tipo</th></tr></thead>
+        <tbody>
+          <tr class="hl2"><td>4.00%</td><td>$1,057</td><td class="pos">+5.7%</td><td><span class="tag tg">PRIMA</span></td></tr>
+          <tr class="hl"><td>6.09%</td><td>$1,000</td><td>0%</td><td><span class="tag ty">PAR</span></td></tr>
+          <tr><td>8.00%</td><td>$951</td><td class="neg">-4.9%</td><td><span class="tag tr">DESCUENTO</span></td></tr>
+        </tbody>
+      </table>
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:8px;">¿Por qué la relación inversa?</div>
+        <div style="font-size:13px;line-height:1.7;">Los cupones de SodaCo son <strong>fijos en contrato</strong> ($30 semi-anual). Si los yields del mercado <em>suben</em> al 8%, los inversores pueden conseguir más en otro lado → SodaCo se vuelve menos atractiva → su precio <strong>cae</strong> hasta que el yield implícito iguala al del mercado.</div>
+      </div>
+      <div class="disc">
+        <div class="disc-l">💬 Arbitraje de mercado</div>
+        <p>Si el competidor ofrece 4% YTM por el mismo riesgo que SodaCo (6.09%), ¿comprarían SodaCo? Sí. La demanda excesiva subiría el precio hasta que los yields se igualen. El mercado se auto-equilibra.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 20: CIERRE -->
+<div class="slide cover-slide" id="s20">
+  <div style="text-align:center;max-width:720px;margin:auto;">
+    <div style="font-size:52px;margin-bottom:20px;">🎓</div>
+    <div style="font-size:36px;font-weight:800;margin-bottom:20px;">Resumen de <span class="y">Clase 3</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left;margin-bottom:24px;">
+      <div class="card"><span class="y" style="font-weight:700;">Cajitas</span><br><span style="font-size:12px;color:var(--muted);">NOF + AFN + AIN + Otros = Activo Neto = Capital Invertido</span></div>
+      <div class="card"><span class="y" style="font-weight:700;">NOPAT</span><br><span style="font-size:12px;color:var(--muted);">EBIT × (1 − t) — rentabilidad operativa pura, sin efectos financieros</span></div>
+      <div class="card"><span class="y" style="font-weight:700;">Márgenes</span><br><span style="font-size:12px;color:var(--muted);">Bruto (52.7%) · Operativo (12.7%) · Neto (9.2%) — MELI mejora bottom-line</span></div>
+      <div class="card"><span class="y" style="font-weight:700;">ROIC = M × R</span><br><span style="font-size:12px;color:var(--muted);">33.63% = 9.95% × 3.38× >> WACC → crea valor económico masivo</span></div>
+      <div class="card" style="border-color:rgba(88,166,255,0.3);"><span class="b" style="font-weight:700;">YTM</span><br><span style="font-size:12px;color:var(--muted);">TIR de todos los flujos del bono · YTM efectivo > BEY por compounding</span></div>
+      <div class="card" style="border-color:rgba(88,166,255,0.3);"><span class="b" style="font-weight:700;">Precio ↔ Yield</span><br><span style="font-size:12px;color:var(--muted);">Relación inversa fundamental · Yield &gt; Cupón → Descuento</span></div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Próximo paso: completar la Hoja de Ruta en Excel · Calculadora Bonos en archivo Bonos.xlsx</div>
+    <div style="font-size:30px;font-weight:800;color:var(--yellow);">¡Muchas gracias!</div>
+  </div>
+</div>
+
+</div><!-- end slides -->
+
+<div id="controls">
+  <button class="btn-nav" id="btnPrev" onclick="prevSlide()" disabled>← Anterior</button>
+  <div id="dots"></div>
+  <button class="btn-nav" id="btnNext" onclick="nextSlide()">Siguiente →</button>
+</div>
+
+<script>
+// ===== NAVIGATION =====
+const TOTAL=21;
+let cur=0;
+let timerInterval=null,timerSec=0,timerRunning=false;
+const allSlides=document.querySelectorAll('.slide');
+const dotsEl=document.getElementById('dots');
+const navSec=document.getElementById('nav-sec');
+const navCnt=document.getElementById('nav-cnt');
+const progEl=document.getElementById('prog');
+
+const SECS=['','Introducción','Repaso','Cajitas','Cajitas','Ejercicio 1','Resultados','Resultados','Ejercicio 2','Márgenes','Ratios','Ratios','Ejercicio 3','Síntesis MELI','Bonos','Bonos','Bonos','Calculadora','Bonos','Bonos','Cierre'];
+
+for(let i=0;i<TOTAL;i++){const d=document.createElement('div');d.className='dot'+(i===0?' active':'');d.onclick=()=>goTo(i);dotsEl.appendChild(d);}
+
+function goTo(n){
+  if(n<0||n>=TOTAL)return;
+  allSlides[cur].classList.remove('active');
+  allSlides[cur].classList.add('exit');
+  setTimeout(()=>allSlides[cur<n?cur:n].classList.remove('exit'),400);
+  cur=n;
+  allSlides[cur].classList.add('active');
+  document.querySelectorAll('.dot').forEach((d,i)=>{d.className='dot'+(i===cur?' active':'');});
+  navSec.textContent=SECS[cur]||'';
+  navCnt.textContent=(cur+1)+' / '+TOTAL;
+  progEl.style.width=((cur/(TOTAL-1))*100)+'%';
+  document.getElementById('btnPrev').disabled=cur===0;
+  document.getElementById('btnNext').disabled=cur===TOTAL-1;
+  onEnter(cur);
+}
+function nextSlide(){goTo(cur+1);}
+function prevSlide(){goTo(cur-1);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')nextSlide();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')prevSlide();
+});
+
+// ===== TIMER =====
+function toggleTimer(){
+  if(!timerRunning){
+    timerInterval=setInterval(()=>{
+      timerSec++;
+      const m=Math.floor(timerSec/60),s=timerSec%60;
+      document.getElementById('timer-disp').textContent=
+        String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+' / 90:00';
+      if(timerSec>=5400){clearInterval(timerInterval);timerRunning=false;}
+    },1000);
+    timerRunning=true;
+    document.getElementById('timer-btn').textContent='⏸ Pausar';
+  } else {
+    clearInterval(timerInterval);timerRunning=false;
+    document.getElementById('timer-btn').textContent='▶ Reanudar';
+  }
+}
+
+// ===== CHARTS =====
+let chartsInit={};
+function onEnter(n){
+  if(n===19&&!chartsInit.py)initPYChart();
+}
+
+function bondPrice(par,couponAnnual,freq,years,ytmEffective){
+  const pmt=par*couponAnnual/freq;
+  const n=years*freq;
+  const rPer=Math.pow(1+ytmEffective,1/freq)-1;
+  let p=0;
+  for(let t=1;t<=n;t++)p+=pmt/Math.pow(1+rPer,t);
+  p+=par/Math.pow(1+rPer,n);
+  return p;
+}
+
+function initPYChart(){
+  chartsInit.py=true;
+  const ctx=document.getElementById('chartPY').getContext('2d');
+  const yields=[],prices=[];
+  for(let y=0.5;y<=18;y+=0.5){
+    yields.push(y);
+    prices.push(bondPrice(1000,0.06,2,3,y/100));
+  }
+  const parYtm=6.09;
+  new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:yields.map(y=>y+'%'),
+      datasets:[
+        {label:'Precio del Bono SodaCo',data:prices,borderColor:'rgba(88,166,255,0.9)',backgroundColor:'rgba(88,166,255,0.08)',tension:.3,borderWidth:2,pointRadius:0},
+        {label:'Par ($1,000)',data:yields.map(()=>1000),borderColor:'rgba(255,230,0,0.5)',borderWidth:1,borderDash:[6,4],pointRadius:0}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'rgba(139,148,158,1)',font:{size:11}}},
+        tooltip:{backgroundColor:'rgba(22,27,39,0.95)',borderColor:'rgba(48,54,61,1)',borderWidth:1,
+          callbacks:{label:ctx=>'$'+ctx.raw.toFixed(2)}}
+      },
+      scales:{
+        x:{ticks:{color:'rgba(139,148,158,1)',font:{size:10},maxTicksLimit:12},grid:{color:'rgba(48,54,61,0.5)'},title:{display:true,text:'YTM (%)',color:'rgba(139,148,158,1)'}},
+        y:{ticks:{color:'rgba(139,148,158,1)',font:{size:11},callback:v=>'$'+v.toFixed(0)},grid:{color:'rgba(48,54,61,0.5)'},title:{display:true,text:'Precio ($)',color:'rgba(139,148,158,1)'}}
+      }
+    }
+  });
+}
+
+// ===== BOND CALCULATOR =====
+function calcBond(){
+  const par=parseFloat(document.getElementById('b-par').value)||1000;
+  const coup=parseFloat(document.getElementById('b-coup').value)||6;
+  const freq=parseFloat(document.getElementById('b-freq').value)||2;
+  const yrs=parseFloat(document.getElementById('b-yrs').value)||3;
+  const ytmSlider=parseFloat(document.getElementById('b-ytm-slider').value)||6.09;
+
+  const pmt=par*coup/100/freq;
+  const n=yrs*freq;
+  const rPer=Math.pow(1+ytmSlider/100,1/freq)-1;
+  const price=bondPrice(par,coup/100,freq,yrs,ytmSlider/100);
+  const ytmEff=Math.pow(1+rPer,freq)-1;
+  const bey=rPer*freq;
+
+  document.getElementById('br-n').textContent=n;
+  document.getElementById('br-pmt').textContent='$'+pmt.toFixed(2);
+  document.getElementById('br-rper').textContent=(rPer*100).toFixed(4)+'%';
+  document.getElementById('br-ytm').textContent=(ytmEff*100).toFixed(4)+'%';
+  document.getElementById('br-bey').textContent=(bey*100).toFixed(4)+'%';
+  updatePriceDisplay(price,par);
+}
+
+function calcFromYTM(){
+  const val=parseFloat(document.getElementById('b-ytm-slider').value);
+  document.getElementById('ytm-slider-val').textContent=val.toFixed(2)+'%';
+  calcBond();
+}
+
+function calcBondFromPrice(){
+  const par=parseFloat(document.getElementById('b-par').value)||1000;
+  const coup=parseFloat(document.getElementById('b-coup').value)||6;
+  const freq=parseFloat(document.getElementById('b-freq').value)||2;
+  const yrs=parseFloat(document.getElementById('b-yrs').value)||3;
+  const priceInput=parseFloat(document.getElementById('b-price').value)||1000;
+  const pmt=par*coup/100/freq;
+  const n=yrs*freq;
+  // Binary search for YTM
+  let lo=0.0001,hi=50;
+  for(let i=0;i<100;i++){
+    const mid=(lo+hi)/2;
+    const p=bondPrice(par,coup/100,freq,yrs,mid/100);
+    if(p>priceInput)lo=mid;else hi=mid;
+  }
+  const ytm=(lo+hi)/2;
+  document.getElementById('b-ytm-slider').value=Math.min(20,Math.max(0.5,ytm)).toFixed(2);
+  document.getElementById('ytm-slider-val').textContent=ytm.toFixed(2)+'%';
+  calcBond();
+}
+
+function updatePriceDisplay(price,par){
+  const el=document.getElementById('price-display');
+  const badge=document.getElementById('bond-type-badge');
+  el.textContent='$'+price.toFixed(2);
+  el.className='price-display ';
+  if(Math.abs(price-par)<0.5){
+    el.className+='price-par';
+    badge.innerHTML='<span class="tag ty">A LA PAR</span>';
+  } else if(price>par){
+    el.className+='price-premium';
+    badge.innerHTML='<span class="tag tg">PRIMA — Precio > Par</span>';
+  } else {
+    el.className+='price-discount';
+    badge.innerHTML='<span class="tag tr">DESCUENTO — Precio < Par</span>';
+  }
+}
+
+// ===== INPUT CHECKERS =====
+function chk(id,correct,tol){
+  const el=document.getElementById(id);
+  const v=parseFloat(el.value.replace(',','.'));
+  el.classList.remove('ok','err');
+  if(isNaN(v))return;
+  el.classList.add(Math.abs(v-correct)<=tol?'ok':'err');
+}
+function chkPct(id,correct,tol){
+  const el=document.getElementById(id);
+  const v=parseFloat(el.value.replace('%','').replace(',','.'));
+  el.classList.remove('ok','err');
+  if(isNaN(v))return;
+  el.classList.add(Math.abs(v-correct)<=tol?'ok':'err');
+}
+function chkRot(id,correct){
+  const el=document.getElementById(id);
+  const v=parseFloat(el.value.replace('×','').replace(',','.'));
+  el.classList.remove('ok','err');
+  if(isNaN(v))return;
+  el.classList.add(Math.abs(v-correct)<=0.1?'ok':'err');
+}
+
+// ===== CAJITAS EXERCISE =====
+const CAJITAS_ANS={nof1:2928,nof2:2478,nof3:161,nof4:580,nof5:6147,nof6:1796,nof7:4351,nof8:6147};
+function checkCajitas(){Object.entries(CAJITAS_ANS).forEach(([k,v])=>chk(k,v,v*0.02+50));}
+function revealCajitas(){
+  Object.entries(CAJITAS_ANS).forEach(([k,v])=>{
+    const el=document.getElementById(k);
+    el.value=v;el.classList.remove('err');el.classList.add('ok');
+  });
+  const ck=document.getElementById('nof-check');
+  ck.style.display='block';
+}
+
+// ===== NOPAT EXERCISE =====
+function checkNOPAT(){
+  chkPct('np1',21.4,1);chk('np2',563,30);chk('np3',2068,60);
+}
+function revealNOPAT(){
+  const ans={np1:'21.4%',np2:'563',np3:'2068'};
+  Object.entries(ans).forEach(([k,v])=>{
+    const el=document.getElementById(k);
+    el.value=v;el.classList.remove('err');el.classList.add('ok');
+  });
+  document.getElementById('nopat-ans').classList.add('show');
+}
+
+// ===== RATIOS EXERCISE =====
+function checkRatios(){
+  chkPct('r1',10.44,0.5);chkPct('r2',43.92,1);chkPct('r3',33.63,1);
+  chkPct('r4',9.95,0.5);chkRot('r5',3.38);chkPct('r6',33.63,1);
+}
+function revealRatios(){
+  const ans={r1:'10.44%',r2:'43.92%',r3:'33.63%',r4:'9.95%',r5:'3.38×',r6:'33.63%'};
+  Object.entries(ans).forEach(([k,v])=>{
+    const el=document.getElementById(k);
+    el.value=v;el.classList.remove('err');el.classList.add('ok');
+  });
+  document.getElementById('ratio-ans').classList.add('show');
+}
+
+// Init
+goTo(0);
+calcBond();
+</script>
+</body>
+</html>

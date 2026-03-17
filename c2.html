@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finanzas Corporativas · Performance MELI</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0D1117;--card:#161B27;--card2:#1C2333;
+  --yellow:#FFE600;--green:#21D07A;--red:#F85149;--blue:#58A6FF;
+  --text:#E6EDF3;--muted:#8B949E;--border:#30363D;--radius:12px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+
+/* NAVBAR */
+#navbar{position:fixed;top:0;left:0;right:0;height:50px;background:rgba(13,17,23,0.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:100;backdrop-filter:blur(12px);}
+#nav-left{display:flex;align-items:center;gap:16px;}
+#nav-logo{width:28px;height:28px;background:var(--yellow);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;color:#000;}
+#nav-title{font-size:13px;font-weight:700;color:var(--yellow);letter-spacing:.5px;text-transform:uppercase;}
+#nav-section{font-size:12px;color:var(--muted);padding-left:16px;border-left:1px solid var(--border);}
+#nav-right{display:flex;align-items:center;gap:20px;}
+#nav-counter{font-size:13px;color:var(--text);font-variant-numeric:tabular-nums;}
+#timer-display{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;}
+#timer-btn{background:transparent;border:1px solid var(--border);color:var(--muted);padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;}
+#timer-btn:hover{border-color:var(--yellow);color:var(--yellow);}
+
+/* PROGRESS */
+#progress-bar{position:fixed;top:50px;left:0;height:3px;background:var(--yellow);transition:width 0.3s ease;z-index:100;}
+
+/* SLIDES */
+#slides{position:fixed;top:53px;bottom:60px;left:0;right:0;overflow:hidden;}
+.slide{position:absolute;top:0;left:0;right:0;bottom:0;padding:36px 56px;display:flex;flex-direction:column;opacity:0;transform:translateX(50px);transition:opacity .35s ease,transform .35s ease;pointer-events:none;overflow-y:auto;}
+.slide.active{opacity:1;transform:translateX(0);pointer-events:all;}
+.slide.exit{opacity:0;transform:translateX(-50px);}
+
+/* CONTROLS */
+#controls{position:fixed;bottom:0;left:0;right:0;height:60px;background:rgba(13,17,23,0.97);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:12px;z-index:100;}
+.btn-nav{background:var(--card2);color:var(--text);border:1px solid var(--border);padding:9px 24px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;}
+.btn-nav:hover{border-color:var(--yellow);color:var(--yellow);}
+.btn-nav:disabled{opacity:0.3;cursor:not-allowed;}
+#slide-dots{display:flex;gap:5px;align-items:center;}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .2s;}
+.dot.active{background:var(--yellow);width:18px;border-radius:3px;}
+
+/* TYPOGRAPHY */
+.slide-title{font-size:34px;font-weight:800;line-height:1.2;margin-bottom:6px;}
+.slide-title .y{color:var(--yellow);}
+.slide-sub{font-size:15px;color:var(--muted);margin-bottom:28px;}
+.badge{display:inline-block;background:rgba(255,230,0,0.12);color:var(--yellow);border:1px solid rgba(255,230,0,0.3);padding:3px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px;}
+.time-hint{font-size:11px;color:var(--muted);background:var(--card2);border:1px solid var(--border);padding:2px 10px;border-radius:12px;display:inline-block;margin-left:10px;}
+
+/* COVER */
+.slide-cover{justify-content:center;align-items:center;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(255,230,0,0.07) 0%,transparent 65%);}
+.cover-logo{width:90px;height:90px;background:var(--yellow);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:900;color:#000;margin:0 auto 28px;box-shadow:0 0 80px rgba(255,230,0,0.25);}
+.cover-title{font-size:50px;font-weight:800;margin-bottom:14px;}
+.cover-sub{font-size:18px;color:var(--muted);margin-bottom:44px;}
+.cover-meta{display:flex;gap:32px;justify-content:center;font-size:13px;color:var(--muted);}
+.cover-meta span{display:flex;align-items:center;gap:6px;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;}
+
+/* KPIs */
+.kpi-val{font-size:38px;font-weight:800;color:var(--yellow);line-height:1;font-variant-numeric:tabular-nums;}
+.kpi-lbl{font-size:11px;color:var(--muted);margin-top:6px;text-transform:uppercase;letter-spacing:.5px;}
+.kpi-sub{font-size:12px;color:var(--green);margin-top:3px;}
+
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{background:var(--card2);color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.5px;padding:9px 11px;text-align:right;border-bottom:2px solid var(--border);}
+thead th:first-child{text-align:left;}
+tbody td{padding:9px 11px;text-align:right;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums;}
+tbody td:first-child{text-align:left;font-weight:500;}
+tbody tr:hover{background:rgba(255,255,255,0.02);}
+.hl td{color:var(--yellow);font-weight:700;background:rgba(255,230,0,0.04);}
+.pos{color:var(--green);}
+.neg{color:var(--red);}
+
+/* BUTTONS */
+.btn-p{background:var(--yellow);color:#000;border:none;padding:9px 22px;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;}
+.btn-p:hover{background:#e6cf00;}
+.btn-s{background:transparent;color:var(--text);border:1px solid var(--border);padding:9px 22px;border-radius:8px;cursor:pointer;font-size:13px;transition:all .2s;}
+.btn-s:hover{border-color:var(--muted);}
+.btn-grp{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+.btn-reveal{background:rgba(255,230,0,0.08);border:1px dashed rgba(255,230,0,0.3);color:var(--yellow);padding:9px 20px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:8px;transition:all .2s;margin-top:10px;}
+.btn-reveal:hover{background:rgba(255,230,0,0.15);}
+
+/* FORMULA */
+.formula{background:var(--card2);border:1px solid var(--border);border-left:4px solid var(--yellow);padding:14px 18px;border-radius:8px;font-size:15px;color:var(--yellow);margin:12px 0;font-family:'Courier New',monospace;}
+.formula .v{color:var(--text);}
+
+/* DISCUSSION */
+.disc{background:rgba(88,166,255,0.07);border:1px solid rgba(88,166,255,0.2);border-radius:8px;padding:14px 18px;margin-top:14px;}
+.disc-lbl{font-size:10px;color:var(--blue);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.disc p{font-size:13px;color:var(--text);line-height:1.6;}
+
+/* CLASSIFY EXERCISE */
+.cl-item{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:7px;display:flex;align-items:center;justify-content:space-between;gap:10px;transition:border-color .2s;}
+.cl-name{font-size:13px;font-weight:500;flex:1;}
+.cl-btns{display:flex;gap:5px;}
+.cl-btn{padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;font-size:11px;font-weight:700;transition:all .2s;}
+.cl-btn:hover{border-color:var(--yellow);color:var(--yellow);}
+.cl-btn.sel{background:rgba(255,230,0,0.18);border-color:var(--yellow);color:var(--yellow);}
+.cl-btn.ok{background:rgba(33,208,122,0.18);border-color:var(--green);color:var(--green);}
+.cl-btn.err{background:rgba(248,81,73,0.18);border-color:var(--red);color:var(--red);}
+
+/* AV EXERCISE */
+.av-input{width:78px;background:rgba(255,230,0,0.07);border:1px solid rgba(255,230,0,0.25);color:var(--text);padding:5px 7px;border-radius:5px;text-align:right;font-size:13px;}
+.av-input:focus{outline:none;border-color:var(--yellow);}
+.av-input.ok{background:rgba(33,208,122,0.12);border-color:var(--green);}
+.av-input.err{background:rgba(248,81,73,0.12);border-color:var(--red);}
+.av-fixed{font-variant-numeric:tabular-nums;color:var(--muted);}
+
+/* ANSWER PANELS */
+.ans-panel{display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.ans-panel.show{display:block;}
+
+/* TAGS */
+.tag{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;text-transform:uppercase;}
+.tg{background:rgba(33,208,122,0.18);color:var(--green);}
+.ty{background:rgba(255,230,0,0.18);color:var(--yellow);}
+.tr{background:rgba(248,81,73,0.18);color:var(--red);}
+.tb{background:rgba(88,166,255,0.18);color:var(--blue);}
+
+/* TIMELINE (agenda) */
+.tl{display:flex;margin:18px 0;}
+.tl-seg{flex:1;padding:12px 8px 10px;border-top:4px solid var(--border);text-align:center;}
+.tl-seg.on{border-color:var(--yellow);}
+.tl-seg.done{border-color:var(--green);}
+.tl-time{font-size:10px;font-weight:700;color:var(--yellow);}
+.tl-lbl{font-size:11px;color:var(--text);margin-top:3px;line-height:1.3;}
+.tl-min{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* FINANCIAL VISION DIAGRAM */
+.fin-vis{display:grid;grid-template-columns:1fr 30px 1fr;gap:0;align-items:center;max-width:640px;margin:0 auto;}
+.fv-left,.fv-right{display:flex;flex-direction:column;gap:4px;}
+.fv-cell{padding:14px 16px;border-radius:8px;text-align:center;font-size:13px;font-weight:600;}
+.fv-ao{background:rgba(88,166,255,0.15);border:1px solid rgba(88,166,255,0.3);}
+.fv-af{background:rgba(255,230,0,0.12);border:1px solid rgba(255,230,0,0.25);}
+.fv-po{background:rgba(33,208,122,0.12);border:1px solid rgba(33,208,122,0.25);}
+.fv-pf{background:rgba(248,81,73,0.12);border:1px solid rgba(248,81,73,0.25);}
+.fv-eq{background:rgba(168,85,247,0.15);border:1px solid rgba(168,85,247,0.3);}
+.fv-arrow{text-align:center;color:var(--muted);font-size:18px;}
+
+/* METRIC BIG */
+.m-big{font-size:36px;font-weight:800;color:var(--yellow);font-variant-numeric:tabular-nums;}
+.m-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.m-ctx{font-size:12px;color:var(--green);margin-top:3px;}
+
+/* Q CARDS */
+.qcard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden;}
+.qcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--yellow);}
+.qnum{font-size:10px;color:var(--yellow);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.qtitle{font-size:17px;font-weight:700;margin-bottom:8px;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* CHART WRAPPER */
+.ch-wrap{position:relative;width:100%;}
+
+/* ECO GRID */
+.eco-side{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.eco-title{font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.eco-item{background:var(--card2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:6px;font-size:12px;font-weight:500;}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div id="navbar">
+  <div id="nav-left">
+    <div id="nav-logo">M</div>
+    <div id="nav-title">Finanzas Corporativas</div>
+    <div id="nav-section" id="nav-sec">Introducción</div>
+  </div>
+  <div id="nav-right">
+    <span id="timer-display">00:00 / 90:00</span>
+    <button id="timer-btn" onclick="toggleTimer()">▶ Iniciar</button>
+    <span id="nav-counter">1 / 21</span>
+  </div>
+</div>
+<div id="progress-bar" style="width:0%"></div>
+
+<!-- SLIDES -->
+<div id="slides">
+
+<!-- ====== SLIDE 0: PORTADA ====== -->
+<div class="slide slide-cover active" id="s0">
+  <div class="cover-logo">M</div>
+  <div class="cover-title">Análisis de <span style="color:var(--yellow)">Performance</span></div>
+  <div class="cover-sub">MercadoLibre Inc. · Finanzas Corporativas</div>
+  <div class="cover-meta">
+    <span>📘 Tutorial 2</span>
+    <span>⏱ 90 minutos</span>
+    <span>📊 Datos: S&P Capital IQ</span>
+    <span>💰 USD millones</span>
+  </div>
+</div>
+
+<!-- ====== SLIDE 1: AGENDA ====== -->
+<div class="slide" id="s1">
+  <div class="badge">Agenda</div>
+  <div class="slide-title">Plan de la clase de hoy</div>
+  <div class="slide-sub">90 minutos · 6 secciones · 1 caso real</div>
+  <div class="tl">
+    <div class="tl-seg on"><div class="tl-time">00:00</div><div class="tl-lbl">El Negocio de MELI</div><div class="tl-min">15 min</div></div>
+    <div class="tl-seg"><div class="tl-time">15:00</div><div class="tl-lbl">Lógica del Inversor</div><div class="tl-min">15 min</div></div>
+    <div class="tl-seg"><div class="tl-time">30:00</div><div class="tl-lbl">Visión Financiera</div><div class="tl-min">15 min</div></div>
+    <div class="tl-seg"><div class="tl-time">45:00</div><div class="tl-lbl">AV &amp; AH</div><div class="tl-min">20 min</div></div>
+    <div class="tl-seg"><div class="tl-time">65:00</div><div class="tl-lbl">Las 5 Preguntas</div><div class="tl-min">20 min</div></div>
+    <div class="tl-seg"><div class="tl-time">85:00</div><div class="tl-lbl">Veredicto Final</div><div class="tl-min">5 min</div></div>
+  </div>
+  <div class="g2" style="margin-top:8px;">
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--yellow)">🎯 El hilo conductor</div>
+      <div style="font-size:13px;line-height:1.6;color:var(--text)">Hoy son <strong>analistas financieros</strong>. Acaban de recibir el encargo de analizar si MercadoLibre es una buena inversión. Al final de la clase van a poder responderlo con datos reales.</div>
+    </div>
+    <div class="card">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--yellow)">🛠 Herramientas que vamos a usar</div>
+      <div style="font-size:13px;line-height:1.6;color:var(--text)">· Capital IQ para extraer estados financieros<br>· Análisis Vertical y Horizontal<br>· Visión financiera del balance<br>· Las 5 preguntas de performance</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 2: HOOK ====== -->
+<div class="slide" id="s2">
+  <div class="badge">Hook · 2 min</div>
+  <div class="slide-title">¿<span class="y">Invertirías</span> en MercadoLibre?</div>
+  <div class="slide-sub">Antes de saber cualquier número — ¿qué necesitás conocer para decidir?</div>
+  <div class="g3" style="margin-bottom:18px;">
+    <div class="card" style="text-align:center;border-color:rgba(33,208,122,0.3);">
+      <div style="font-size:28px;font-weight:800;color:var(--green)">$20.8B</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase">Ingresos 2024</div>
+      <div style="font-size:12px;color:var(--green);margin-top:4px;">+37.5% vs 2023</div>
+    </div>
+    <div class="card" style="text-align:center;border-color:rgba(255,230,0,0.3);">
+      <div style="font-size:28px;font-weight:800;color:var(--yellow)">$1.9B</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase">Utilidad Neta 2024</div>
+      <div style="font-size:12px;color:var(--green);margin-top:4px;">+93.6% vs 2023</div>
+    </div>
+    <div class="card" style="text-align:center;border-color:rgba(248,81,73,0.3);">
+      <div style="font-size:28px;font-weight:800;color:var(--red)">???</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase">¿Es suficiente?</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px;">Eso vamos a averiguar</div>
+    </div>
+  </div>
+  <div class="disc">
+    <div class="disc-lbl">💬 Pregunta abierta — 2 minutos</div>
+    <p>Antes de ver los números: ¿qué información financiera necesitarían para decidir si invierten o no en MELI? ¿Qué preguntas se harían?</p>
+  </div>
+  <div class="card" style="margin-top:14px;border-color:rgba(255,230,0,0.2);">
+    <div style="font-size:13px;color:var(--muted)">Al final de la clase van a tener un framework preciso para responder exactamente esas preguntas — con números reales de MELI extraídos de Capital IQ.</div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 3: KPIs ====== -->
+<div class="slide" id="s3">
+  <div class="badge">Sección 1 · El Negocio</div>
+  <div class="slide-title">MELI en <span class="y">números</span> — 2024</div>
+  <div class="slide-sub">Para entender los estados financieros, primero hay que entender el negocio</div>
+  <div class="g3" style="margin-bottom:14px;">
+    <div class="card"><div class="kpi-val" id="k1">0</div><div class="kpi-lbl">Compradores activos</div><div class="kpi-sub">récord histórico</div></div>
+    <div class="card"><div class="kpi-val" id="k2">0</div><div class="kpi-lbl">Compras por segundo</div><div class="kpi-sub">24/7 en toda la región</div></div>
+    <div class="card"><div class="kpi-val" id="k3">0</div><div class="kpi-lbl">Transacciones/seg (Pago)</div><div class="kpi-sub">Mercado Pago</div></div>
+    <div class="card"><div class="kpi-val" id="k4">0</div><div class="kpi-lbl">Pagos procesados</div><div class="kpi-sub">Total Payment Volume</div></div>
+    <div class="card"><div class="kpi-val" id="k5">0</div><div class="kpi-lbl">Gross Merchandise Volume</div><div class="kpi-sub">volumen de mercancía</div></div>
+    <div class="card"><div class="kpi-val" id="k6">0</div><div class="kpi-lbl">Empleados</div><div class="kpi-sub">+44.4% vs 2023</div></div>
+  </div>
+  <div class="disc">
+    <div class="disc-lbl">💬 Para reflexionar</div>
+    <p>71.8% de los envíos llegan el mismo día o al día siguiente. ¿Cómo impacta esto en la estructura de costos operativos de MELI?</p>
+  </div>
+</div>
+
+<!-- ====== SLIDE 4: REVENUE ====== -->
+<div class="slide" id="s4">
+  <div class="badge">Sección 1 · El Negocio</div>
+  <div class="slide-title">Revenue Streams <span class="y">2021–2024</span></div>
+  <div class="slide-sub">Entendiendo de dónde vienen los ingresos · USD millones</div>
+  <div class="g2">
+    <div>
+      <div class="ch-wrap" style="height:280px;"><canvas id="chartRevenue"></canvas></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Composición 2024</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="flex:1;background:var(--card2);border-radius:4px;height:8px;overflow:hidden;"><div style="width:58.5%;height:100%;background:var(--yellow);border-radius:4px;"></div></div>
+          <span style="font-size:12px;font-weight:700;">58.5%</span>
+          <span style="font-size:12px;color:var(--muted);">Commerce $12.2B</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;background:var(--card2);border-radius:4px;height:8px;overflow:hidden;"><div style="width:41.5%;height:100%;background:var(--green);border-radius:4px;"></div></div>
+          <span style="font-size:12px;font-weight:700;">41.5%</span>
+          <span style="font-size:12px;color:var(--muted);">Fintech $8.6B</span>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;">Por País (Commerce 2023)</div>
+        <table>
+          <tbody>
+            <tr><td>Brasil</td><td class="pos">54.9%</td></tr>
+            <tr><td>México</td><td>22.4%</td></tr>
+            <tr><td>Argentina</td><td>18.4%</td></tr>
+            <tr><td>Otros</td><td class="neg">4.3%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="disc" style="margin-top:0;">
+        <div class="disc-lbl">💬 Pregunta</div>
+        <p>¿Qué riesgos implica que el 41.5% de los ingresos venga de fintech? ¿Cómo cambia el perfil de riesgo del negocio?</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 5: ECOSISTEMA ====== -->
+<div class="slide" id="s5">
+  <div class="badge">Sección 1 · El Negocio</div>
+  <div class="slide-title">El <span class="y">Ecosistema</span> MELI</div>
+  <div class="slide-sub">Dos negocios complementarios que se refuerzan entre sí</div>
+  <div class="g2">
+    <div class="eco-side">
+      <div class="eco-title" style="color:var(--yellow)">🛒 Commerce — Mercado Libre</div>
+      <div class="eco-item">Marketplace (3P) — vendedores independientes</div>
+      <div class="eco-item">1P — venta directa de MELI</div>
+      <div class="eco-item">Advertising — publicidad dentro de la plataforma</div>
+      <div class="eco-item">Mercado Envíos — logística y última milla</div>
+      <div class="eco-item">Mercado Shops — tiendas virtuales</div>
+    </div>
+    <div class="eco-side">
+      <div class="eco-title" style="color:var(--green)">💳 Fintech — Mercado Pago</div>
+      <div class="eco-item">Online Payments — cobros digitales</div>
+      <div class="eco-item">Physical Store Payments — POS físicos</div>
+      <div class="eco-item">Digital Account — cuenta billetera virtual</div>
+      <div class="eco-item">Credits — créditos a consumidores y vendedores</div>
+      <div class="eco-item">Asset Management — fondos de inversión</div>
+      <div class="eco-item">Crypto · Insurtech</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;border-color:rgba(255,230,0,0.2);">
+    <div style="font-size:13px;color:var(--text)">
+      <span style="color:var(--yellow);font-weight:700;">Flywheel effect:</span> Más compradores → más vendedores → más pagos procesados → más datos de crédito → mejores préstamos → más compradores. El Commerce y el Fintech se alimentan mutuamente — esta sinergia es el verdadero moat de MELI.
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 6: INVERSOR I ====== -->
+<div class="slide" id="s6">
+  <div class="badge">Sección 2 · Lógica del Inversor</div>
+  <div class="slide-title">La lógica del <span class="y">inversor</span></div>
+  <div class="slide-sub">¿Cómo piensa alguien que va a poner su capital en un negocio?</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin:20px 0;">
+    <div style="background:var(--card2);border:2px solid var(--border);border-radius:12px;padding:18px 24px;text-align:center;min-width:130px;">
+      <div style="font-size:28px;margin-bottom:6px;">💰</div>
+      <div style="font-size:14px;font-weight:700;">Inversión</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px;">Capital comprometido</div>
+    </div>
+    <div style="font-size:28px;color:var(--yellow)">→</div>
+    <div style="background:rgba(255,230,0,0.08);border:2px solid var(--yellow);border-radius:12px;padding:18px 24px;text-align:center;min-width:160px;">
+      <div style="font-size:20px;font-weight:800;color:var(--yellow);">Negocio</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px;">genera flujos esperados</div>
+    </div>
+    <div style="font-size:28px;color:var(--yellow)">→</div>
+    <div style="background:var(--card2);border:2px solid var(--green);border-radius:12px;padding:18px 24px;text-align:center;min-width:130px;">
+      <div style="font-size:28px;margin-bottom:6px;">📈</div>
+      <div style="font-size:14px;font-weight:700;color:var(--green);">Retorno</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:3px;">flujos generados</div>
+    </div>
+  </div>
+  <div class="formula" style="text-align:center;font-size:22px;">θ = <span class="v">Retorno Esperado</span> / <span class="v">Riesgo</span> → <span style="color:var(--green)">MAXIMIZAR</span></div>
+  <div class="g2" style="margin-top:14px;">
+    <div class="card">
+      <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:10px;text-transform:uppercase;">Factores que evalúa el inversor</div>
+      <div style="font-size:13px;line-height:1.8;">
+        📌 <strong>Liquidez</strong> del capital invertido<br>
+        ⏳ <strong>Plazo de recupero</strong> de la inversión<br>
+        🔄 <strong>Periodicidad</strong> de los flujos esperados<br>
+        📊 <strong>Participación</strong> en el portafolio total
+      </div>
+    </div>
+    <div class="disc" style="margin-top:0;">
+      <div class="disc-lbl">💬 Aplicado a MELI</div>
+      <p>Si MELI tiene $1.9B de utilidad neta y su capitalización bursátil es de ~$100B, ¿cuál es el "retorno" contable? ¿Es suficiente para el riesgo que implica un negocio en mercados emergentes?</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 7: INVERSOR II - VALOR ====== -->
+<div class="slide" id="s7">
+  <div class="badge">Sección 2 · Lógica del Inversor</div>
+  <div class="slide-title">Creación de <span class="y">Valor Económico</span></div>
+  <div class="slide-sub">Un negocio crea valor solo cuando su retorno supera lo que exige el mercado</div>
+  <div style="display:flex;gap:20px;align-items:stretch;margin:16px 0;">
+    <div class="card" style="flex:1;text-align:center;border-color:rgba(248,81,73,0.3);">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Retorno Exigido (WACC)</div>
+      <div style="font-size:36px;font-weight:800;color:var(--red);">~12%</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">costo de capital de MELI<br>(riesgo EM + sector)</div>
+    </div>
+    <div style="display:flex;align-items:center;font-size:28px;color:var(--muted);">vs</div>
+    <div class="card" style="flex:1;text-align:center;border-color:rgba(33,208,122,0.3);">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Retorno Obtenido (ROIC)</div>
+      <div style="font-size:36px;font-weight:800;color:var(--green);">27.6%</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">NOPAT / Capital Invertido<br>(lo calcularemos juntos)</div>
+    </div>
+    <div style="display:flex;align-items:center;font-size:28px;color:var(--yellow);">→</div>
+    <div class="card" style="flex:1;text-align:center;background:rgba(255,230,0,0.05);border-color:var(--yellow);">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Spread de Valor</div>
+      <div style="font-size:36px;font-weight:800;color:var(--yellow);">+15.6%</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">retorno extraordinario<br>sobre el capital</div>
+    </div>
+  </div>
+  <div class="formula">
+    Creación de Valor = <span class="v">(ROIC − WACC)</span> × <span class="v">Capital Invertido</span><br>
+    <span style="font-size:13px;color:var(--green);">≈ (27.6% − 12%) × $7,535M ≈ $1,175M de valor creado en 2024</span>
+  </div>
+  <div class="disc">
+    <div class="disc-lbl">💬 Concepto clave</div>
+    <p>El objetivo final de un negocio no es maximizar ventas ni incluso utilidades — es maximizar la <strong>creación de valor económico</strong>. Una empresa puede crecer y destruir valor si su retorno no supera el costo de capital.</p>
+  </div>
+</div>
+
+<!-- ====== SLIDE 8: VISIÓN CONTABLE ====== -->
+<div class="slide" id="s8">
+  <div class="badge">Sección 3 · Visión Financiera</div>
+  <div class="slide-title">Dos formas de leer el mismo <span class="y">balance</span></div>
+  <div class="slide-sub">La visión contable vs. la visión financiera — mismos datos, diferente lectura</div>
+  <div class="g2">
+    <div>
+      <div style="font-size:14px;font-weight:700;color:var(--blue);margin-bottom:12px;">📚 Mirada Contable</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;max-width:400px;">
+        <div class="fv-cell fv-ao" style="grid-row:1/3;display:flex;flex-direction:column;justify-content:center;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Activo</div>
+          <div style="font-size:18px;font-weight:800;color:var(--blue);">Corriente</div>
+          <div style="font-size:13px;font-weight:700;">+</div>
+          <div style="font-size:18px;font-weight:800;color:var(--blue);">No Corriente</div>
+        </div>
+        <div class="fv-cell fv-pf">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Pasivo</div>
+          <div style="font-size:15px;font-weight:800;">C + NC</div>
+        </div>
+        <div class="fv-cell fv-eq">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Patrimonio Neto</div>
+          <div style="font-size:15px;font-weight:800;">PN</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--muted);margin-top:10px;font-style:italic;">Activo = Pasivo + Patrimonio Neto</div>
+    </div>
+    <div>
+      <div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:12px;">📊 Mirada Financiera</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;max-width:400px;">
+        <div class="fv-cell fv-ao" style="grid-row:1/3;display:flex;flex-direction:column;justify-content:center;gap:4px;">
+          <div style="font-size:13px;font-weight:800;color:var(--blue);">Activo Operativo</div>
+          <div style="font-size:12px;font-weight:700;color:var(--border);">−</div>
+          <div style="font-size:13px;font-weight:800;color:var(--blue);">Deuda Operativa</div>
+          <div style="height:1px;background:rgba(255,230,0,0.3);margin:4px 0;"></div>
+          <div style="font-size:14px;font-weight:800;color:var(--yellow);">= ACTIVO NETO</div>
+        </div>
+        <div class="fv-cell fv-pf">
+          <div style="font-size:12px;font-weight:700;">Deuda Financiera Neta</div>
+        </div>
+        <div class="fv-cell fv-eq">
+          <div style="font-size:12px;font-weight:700;">Capital Propio</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--yellow);margin-top:10px;font-weight:700;">Activo Neto = Capital Invertido ✓</div>
+    </div>
+  </div>
+  <div class="disc" style="margin-top:14px;">
+    <div class="disc-lbl">💬 ¿Por qué importa esta distinción?</div>
+    <p>La visión financiera separa lo que es propio del <strong>negocio operativo</strong> (lo que necesito para operar) de lo que es <strong>financiero</strong> (cómo lo fondeo). Solo así puedo medir bien cuánto capital genuinamente invertí y qué retorno obtuve sobre él.</p>
+  </div>
+</div>
+
+<!-- ====== SLIDE 9: EJERCICIO CLASIFICACIÓN ====== -->
+<div class="slide" id="s9">
+  <div class="badge">Ejercicio 1 · Clasificación del Balance</div>
+  <div class="slide-title">¿Operativo o <span class="y">Financiero</span>?</div>
+  <div class="slide-sub">Clasificá cada línea del balance de MELI · AO = Activo Operativo · AF = Activo Financiero · PO = Pasivo Operativo · PF = Pasivo Financiero</div>
+  <div class="g2">
+    <div>
+      <div style="font-size:11px;color:var(--yellow);font-weight:700;text-transform:uppercase;margin-bottom:8px;">Activos</div>
+      <div class="cl-item" id="ci0"><span class="cl-name">Cash &amp; Short-Term Investments</span><div class="cl-btns"><button class="cl-btn" onclick="classify(0,'AO')">AO</button><button class="cl-btn" onclick="classify(0,'AF')">AF</button></div></div>
+      <div class="cl-item" id="ci1"><span class="cl-name">Accounts Receivable</span><div class="cl-btns"><button class="cl-btn" onclick="classify(1,'AO')">AO</button><button class="cl-btn" onclick="classify(1,'AF')">AF</button></div></div>
+      <div class="cl-item" id="ci2"><span class="cl-name">Inventory</span><div class="cl-btns"><button class="cl-btn" onclick="classify(2,'AO')">AO</button><button class="cl-btn" onclick="classify(2,'AF')">AF</button></div></div>
+      <div class="cl-item" id="ci3"><span class="cl-name">Prepaid Expenses</span><div class="cl-btns"><button class="cl-btn" onclick="classify(3,'AO')">AO</button><button class="cl-btn" onclick="classify(3,'AF')">AF</button></div></div>
+      <div class="cl-item" id="ci4"><span class="cl-name">Net PP&amp;E</span><div class="cl-btns"><button class="cl-btn" onclick="classify(4,'AO')">AO</button><button class="cl-btn" onclick="classify(4,'AF')">AF</button></div></div>
+      <div class="cl-item" id="ci5"><span class="cl-name">Goodwill &amp; Intangibles</span><div class="cl-btns"><button class="cl-btn" onclick="classify(5,'AO')">AO</button><button class="cl-btn" onclick="classify(5,'AF')">AF</button></div></div>
+      <div class="cl-item" id="ci6"><span class="cl-name">Long-Term Investments</span><div class="cl-btns"><button class="cl-btn" onclick="classify(6,'AO')">AO</button><button class="cl-btn" onclick="classify(6,'AF')">AF</button></div></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--yellow);font-weight:700;text-transform:uppercase;margin-bottom:8px;">Pasivos</div>
+      <div class="cl-item" id="ci7"><span class="cl-name">Accounts Payable</span><div class="cl-btns"><button class="cl-btn" onclick="classify(7,'PO')">PO</button><button class="cl-btn" onclick="classify(7,'PF')">PF</button></div></div>
+      <div class="cl-item" id="ci8"><span class="cl-name">Accrued Expenses</span><div class="cl-btns"><button class="cl-btn" onclick="classify(8,'PO')">PO</button><button class="cl-btn" onclick="classify(8,'PF')">PF</button></div></div>
+      <div class="cl-item" id="ci9"><span class="cl-name">Unearned Revenue (Deferred)</span><div class="cl-btns"><button class="cl-btn" onclick="classify(9,'PO')">PO</button><button class="cl-btn" onclick="classify(9,'PF')">PF</button></div></div>
+      <div class="cl-item" id="ci10"><span class="cl-name">Short-Term Borrowings</span><div class="cl-btns"><button class="cl-btn" onclick="classify(10,'PO')">PO</button><button class="cl-btn" onclick="classify(10,'PF')">PF</button></div></div>
+      <div class="cl-item" id="ci11"><span class="cl-name">Long-Term Debt</span><div class="cl-btns"><button class="cl-btn" onclick="classify(11,'PO')">PO</button><button class="cl-btn" onclick="classify(11,'PF')">PF</button></div></div>
+      <div class="btn-grp">
+        <button class="btn-p" onclick="checkClassify()">✓ Verificar</button>
+        <button class="btn-reveal" onclick="revealClassify()">👁 Mostrar respuestas</button>
+      </div>
+      <div id="cl-score" class="ans-panel"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 10: AV CONCEPTO ====== -->
+<div class="slide" id="s10">
+  <div class="badge">Sección 4 · AV &amp; AH</div>
+  <div class="slide-title">Análisis Vertical y <span class="y">Horizontal</span></div>
+  <div class="slide-sub">Dos lentes complementarias para leer los estados financieros</div>
+  <div class="g2">
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;color:var(--yellow);margin-bottom:12px;">📏 Análisis Vertical (AV)</div>
+      <div style="font-size:13px;line-height:1.7;">
+        Expresa cada línea como <strong>% de una base</strong>:<br><br>
+        · <strong>Estado de Resultados:</strong> % sobre Ventas<br>
+        · <strong>Balance — Activo:</strong> % sobre Total Activo<br>
+        · <strong>Balance — Pasivo+PN:</strong> % sobre Total Financiamiento<br><br>
+        <span style="color:var(--green);">✓ Identifica la estructura y proporciones</span><br>
+        <span style="color:var(--green);">✓ Permite comparar entre empresas de distinto tamaño</span><br>
+        <span style="color:var(--green);">✓ Mucho más informativo que los valores absolutos</span>
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-size:15px;font-weight:700;color:var(--blue);margin-bottom:12px;">📈 Análisis Horizontal (AH)</div>
+      <div style="font-size:13px;line-height:1.7;">
+        Mide la <strong>variación % entre períodos</strong>:<br><br>
+        · Var % = (Año N − Año N-1) / |Año N-1| × 100<br><br>
+        · <strong>Revenue:</strong> ¿crece el negocio?<br>
+        · <strong>Costos:</strong> ¿crecen más rápido que ventas?<br>
+        · <strong>Activos:</strong> ¿se invierte más cada año?<br><br>
+        <span style="color:var(--green);">✓ Identifica tendencias y aceleración/desaceleración</span><br>
+        <span style="color:var(--green);">✓ Detecta eficiencia operativa o deterioro</span><br>
+        <span style="color:var(--yellow);">⚠ Clave en contextos inflacionarios (Argentina)</span>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px;border-color:rgba(255,230,0,0.2);">
+    <div style="font-size:13px;font-weight:700;color:var(--yellow);margin-bottom:6px;">Nota importante — Análisis en USD</div>
+    <div style="font-size:13px;color:var(--text);">MELI reporta en USD, lo que elimina la distorsión inflacionaria argentina en los comparativos. Al analizar empresas que reportan en pesos, el AH siempre debe ajustarse por inflación para ser significativo.</div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 11: EJERCICIO AV ====== -->
+<div class="slide" id="s11">
+  <div class="badge">Ejercicio 2 · Análisis Vertical</div>
+  <div class="slide-title">AV del Estado de <span class="y">Resultados</span> — MELI 2024</div>
+  <div class="slide-sub">Completá la columna de % sobre ventas · Ventas = base 100% · USD millones</div>
+  <table class="av-table">
+    <thead>
+      <tr><th>Línea</th><th>2024 ($M)</th><th>% Ventas</th><th>2023 ($M)</th><th>% Ventas</th></tr>
+    </thead>
+    <tbody>
+      <tr class="hl"><td>Total Revenue</td><td>20,777</td><td><span class="av-fixed">100.0%</span></td><td>15,107</td><td><span class="av-fixed">100.0%</span></td></tr>
+      <tr><td>Cost of Goods Sold</td><td>9,833</td><td><input class="av-input" id="av1" placeholder="?%" onblur="checkAVInput(1,47.3)"></td><td>6,352</td><td><span class="av-fixed">42.0%</span></td></tr>
+      <tr class="hl"><td>Gross Profit</td><td>10,944</td><td><input class="av-input" id="av2" placeholder="?%" onblur="checkAVInput(2,52.7)"></td><td>8,755</td><td><span class="av-fixed">58.0%</span></td></tr>
+      <tr><td>SG&amp;A</td><td>3,154</td><td><input class="av-input" id="av3" placeholder="?%" onblur="checkAVInput(3,15.2)"></td><td>2,502</td><td><span class="av-fixed">16.6%</span></td></tr>
+      <tr><td>Provision for Bad Debts</td><td>1,858</td><td><input class="av-input" id="av4" placeholder="?%" onblur="checkAVInput(4,8.9)"></td><td>1,050</td><td><span class="av-fixed">7.0%</span></td></tr>
+      <tr><td>R&amp;D Expenses</td><td>1,934</td><td><input class="av-input" id="av5" placeholder="?%" onblur="checkAVInput(5,9.3)"></td><td>1,831</td><td><span class="av-fixed">12.1%</span></td></tr>
+      <tr class="hl"><td>EBIT (Operating Income)</td><td>2,631</td><td><input class="av-input" id="av6" placeholder="?%" onblur="checkAVInput(6,12.7)"></td><td>2,207</td><td><span class="av-fixed">14.6%</span></td></tr>
+      <tr><td>Net Income</td><td>1,911</td><td><input class="av-input" id="av7" placeholder="?%" onblur="checkAVInput(7,9.2)"></td><td>987</td><td><span class="av-fixed">6.5%</span></td></tr>
+    </tbody>
+  </table>
+  <div class="btn-grp">
+    <button class="btn-p" onclick="checkAllAV()">✓ Verificar todo</button>
+    <button class="btn-reveal" onclick="revealAV()">👁 Mostrar respuestas</button>
+  </div>
+  <div id="av-insight" class="ans-panel">
+    <div class="disc">
+      <div class="disc-lbl">💬 ¿Qué nos dice el AV?</div>
+      <p>El Gross Margin cayó de 58% (2023) a 52.7% (2024) — MELI creció muy rápido en Fintech (créditos) que tiene mayor costo. El EBIT margin bajó de 14.6% a 12.7% — inversión agresiva en R&D y logística. Sin embargo, el Net Margin <span style="color:var(--green);">subió</span> de 6.5% a 9.2% — mejor eficiencia fiscal. El negocio es cada vez más rentable en términos netos.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 12: EJERCICIO AH ====== -->
+<div class="slide" id="s12">
+  <div class="badge">Ejercicio 3 · Análisis Horizontal</div>
+  <div class="slide-title">AH — Evolución <span class="y">2022–2024</span></div>
+  <div class="slide-sub">Calculá las variaciones YoY y detectá las tendencias clave · USD millones</div>
+  <table>
+    <thead>
+      <tr><th>Línea</th><th>2022</th><th>2023</th><th>Var 22→23</th><th>2024</th><th>Var 23→24</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Total Revenue</td><td>10,780</td><td>15,107</td><td class="pos">+40.1%</td><td>20,777</td><td><input class="av-input" id="ah1" placeholder="?%" onblur="checkAHInput(1,37.5)"></td></tr>
+      <tr class="hl"><td>Gross Profit</td><td>6,010</td><td>8,755</td><td class="pos">+45.7%</td><td>10,944</td><td><input class="av-input" id="ah2" placeholder="?%" onblur="checkAHInput(2,25.0)"></td></tr>
+      <tr><td>EBIT</td><td>1,081</td><td>2,207</td><td class="pos">+104.2%</td><td>2,631</td><td><input class="av-input" id="ah3" placeholder="?%" onblur="checkAHInput(3,19.2)"></td></tr>
+      <tr class="hl"><td>Net Income</td><td>482</td><td>987</td><td class="pos">+104.8%</td><td>1,911</td><td><input class="av-input" id="ah4" placeholder="?%" onblur="checkAHInput(4,93.6)"></td></tr>
+      <tr><td>Total Assets</td><td>13,736</td><td>17,612</td><td class="pos">+28.2%</td><td>25,196</td><td><input class="av-input" id="ah5" placeholder="?%" onblur="checkAHInput(5,43.1)"></td></tr>
+      <tr><td>Total Equity</td><td>1,827</td><td>3,071</td><td class="pos">+68.1%</td><td>4,351</td><td><input class="av-input" id="ah6" placeholder="?%" onblur="checkAHInput(6,41.7)"></td></tr>
+    </tbody>
+  </table>
+  <div class="btn-grp">
+    <button class="btn-p" onclick="checkAllAH()">✓ Verificar</button>
+    <button class="btn-reveal" onclick="revealAH()">👁 Mostrar respuestas</button>
+  </div>
+  <div id="ah-insight" class="ans-panel">
+    <div class="disc">
+      <div class="disc-lbl">💬 Señales del AH</div>
+      <p><strong style="color:var(--yellow)">Positivo:</strong> Revenue crece 37.5% y Net Income crece 93.6% — la rentabilidad crece más rápido que las ventas (apalancamiento operativo). <strong style="color:var(--green)">El negocio escala bien.</strong><br><br>
+      <strong style="color:var(--yellow)">Para analizar:</strong> Total Assets crecen 43.1% vs Revenue 37.5% — los activos crecen más rápido que las ventas. ¿Eso es bueno o malo? Depende del tipo de activo — en MELI es principalmente la cartera de créditos de Mercado Pago.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 13: 5 PREGUNTAS INTRO ====== -->
+<div class="slide" id="s13">
+  <div class="badge">Sección 5 · Performance</div>
+  <div class="slide-title">Las <span class="y">5 preguntas</span> de performance</div>
+  <div class="slide-sub">El framework para analizar la performance financiera de cualquier negocio</div>
+  <div class="g3" style="gap:14px;">
+    <div class="qcard">
+      <div class="qnum">Pregunta 1</div>
+      <div class="qtitle">¿Cuánto invertí?</div>
+      <div style="font-size:12px;color:var(--muted);">Capital Invertido = Activo Neto = DFN + Capital Propio</div>
+    </div>
+    <div class="qcard">
+      <div class="qnum">Pregunta 2</div>
+      <div class="qtitle">¿En qué invertí?</div>
+      <div style="font-size:12px;color:var(--muted);">Composición del Activo Operativo: NOF + AF Neto + Intangibles</div>
+    </div>
+    <div class="qcard">
+      <div class="qnum">Pregunta 3</div>
+      <div class="qtitle">¿Cuál es el resultado?</div>
+      <div style="font-size:12px;color:var(--muted);">Revenue → Gross Profit → EBITDA → EBIT → Net Income</div>
+    </div>
+    <div class="qcard">
+      <div class="qnum">Pregunta 4</div>
+      <div class="qtitle">¿Cuál es la rentabilidad?</div>
+      <div style="font-size:12px;color:var(--muted);">ROIC = NOPAT / Capital Invertido · ROE = NI / Equity</div>
+    </div>
+    <div class="qcard">
+      <div class="qnum">Pregunta 5</div>
+      <div class="qtitle">¿Cuánto cash generé?</div>
+      <div style="font-size:12px;color:var(--muted);">Free Cash Flow = CFO − CAPEX → ¿qué hacemos con él?</div>
+    </div>
+    <div class="card" style="border-color:rgba(255,230,0,0.2);">
+      <div style="font-size:13px;color:var(--yellow);font-weight:700;margin-bottom:6px;">¿Por qué este orden?</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5;">Primero entendemos la <em>escala</em> (cuánto), luego el <em>uso</em> (en qué), luego el <em>resultado</em> (cuánto ganamos), luego la <em>eficiencia</em> (qué retorno), finalmente la <em>caja</em> (qué queda).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 14: Q1 + Q2 ====== -->
+<div class="slide" id="s14">
+  <div class="badge">Preguntas 1 &amp; 2 · Capital Invertido</div>
+  <div class="slide-title">¿Cuánto y en qué <span class="y">invertí</span>?</div>
+  <div class="slide-sub">Capital Invertido = lo que verdaderamente tengo comprometido en el negocio · USD millones</div>
+  <div class="g2">
+    <div>
+      <table>
+        <thead><tr><th>Componente</th><th>2022</th><th>2023</th><th>2024</th></tr></thead>
+        <tbody>
+          <tr><td>Total Assets</td><td>13,736</td><td>17,612</td><td>25,196</td></tr>
+          <tr><td>− Activo Financiero (Cash)</td><td>(3,030)</td><td>(3,747)</td><td>(3,695)</td></tr>
+          <tr><td>= Activo Operativo</td><td>10,706</td><td>13,865</td><td>21,501</td></tr>
+          <tr><td>− Deuda Operativa</td><td>(6,480)</td><td>(9,191)</td><td>(13,966)</td></tr>
+          <tr class="hl"><td>= ACTIVO NETO (Capital Inv.)</td><td>4,226</td><td>4,674</td><td>7,535</td></tr>
+          <tr><td>Var. Capital Invertido YoY</td><td>—</td><td class="pos">+$448M</td><td class="pos">+$2,861M</td></tr>
+        </tbody>
+      </table>
+      <div class="formula" style="margin-top:12px;">
+        Check: DFN + Capital Propio = Capital Invertido<br>
+        <span class="v" style="font-size:12px;">2024: $3,184M + $4,351M = $7,535M ✓</span>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:10px;text-transform:uppercase;">¿En qué está invertido? (2024)</div>
+        <div style="font-size:13px;line-height:1.8;">
+          📦 <strong>Total Current Assets:</strong> $20,142M (79.9%)<br>
+          &nbsp;&nbsp;&nbsp;↳ Receivables: $10,475M — cartera Mercado Pago<br>
+          &nbsp;&nbsp;&nbsp;↳ Cash: $3,695M<br>
+          🏭 <strong>Net PP&amp;E:</strong> $2,478M (9.8%)<br>
+          💡 <strong>Intangibles + Goodwill:</strong> ~$1,800M<br>
+        </div>
+      </div>
+      <div class="disc">
+        <div class="disc-lbl">💬 Para discutir</div>
+        <p>El Capital Invertido saltó +61% en 2024. ¿Por qué? Principalmente por la expansión de la cartera de créditos de Mercado Pago (+$3.9B en receivables). ¿Esto crea valor o destruye valor? Depende del ROIC — lo calculamos en la P4.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 15: Q3 ====== -->
+<div class="slide" id="s15">
+  <div class="badge">Pregunta 3 · Resultado</div>
+  <div class="slide-title">¿A cuánto asciende el <span class="y">resultado</span>?</div>
+  <div class="slide-sub">Cascada de resultados — de ventas a utilidad neta · USD millones</div>
+  <div class="g2">
+    <div>
+      <table>
+        <thead><tr><th>Línea</th><th>2022</th><th>2023</th><th>2024</th></tr></thead>
+        <tbody>
+          <tr><td>Total Revenue</td><td>10,780</td><td>15,107</td><td>20,777</td></tr>
+          <tr><td>− COGS</td><td>(4,770)</td><td>(6,352)</td><td>(9,833)</td></tr>
+          <tr class="hl"><td>Gross Profit</td><td>6,010</td><td>8,755</td><td>10,944</td></tr>
+          <tr><td>&nbsp;&nbsp;Gross Margin %</td><td>55.8%</td><td>58.0%</td><td class="neg">52.7%</td></tr>
+          <tr><td>− Opex (SG&amp;A + R&amp;D + Prov.)</td><td>(4,929)</td><td>(6,548)</td><td>(8,313)</td></tr>
+          <tr class="hl"><td>EBIT</td><td>1,081</td><td>2,207</td><td>2,631</td></tr>
+          <tr><td>&nbsp;&nbsp;EBIT Margin %</td><td>10.0%</td><td>14.6%</td><td class="neg">12.7%</td></tr>
+          <tr><td>EBITDA</td><td>1,484</td><td>2,731</td><td>3,248</td></tr>
+          <tr class="hl"><td>Net Income</td><td>482</td><td>987</td><td>1,911</td></tr>
+          <tr><td>&nbsp;&nbsp;Net Margin %</td><td>4.5%</td><td>6.5%</td><td class="pos">9.2%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="ch-wrap" style="height:240px;"><canvas id="chartNI"></canvas></div>
+      <div class="disc" style="margin-top:12px;">
+        <div class="disc-lbl">💬 La historia que cuentan los márgenes</div>
+        <p>El Gross Margin cae en 2024 pero el Net Margin <em>sube</em>. Esto indica que MELI mejoró su eficiencia fiscal y financiera. El crecimiento rápido en Fintech (alta provisión para créditos incobrables) comprime el margen bruto, pero el negocio subyacente es cada vez más rentable.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 16: Q4 ====== -->
+<div class="slide" id="s16">
+  <div class="badge">Pregunta 4 · Rentabilidad</div>
+  <div class="slide-title">¿Cuál es la <span class="y">rentabilidad</span>?</div>
+  <div class="slide-sub">Conectando resultado con capital invertido — ¿cuánto ganamos por cada dólar puesto en el negocio?</div>
+  <div class="g3" style="margin-bottom:14px;">
+    <div class="card" style="text-align:center;border-color:rgba(255,230,0,0.3);">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">ROIC 2024</div>
+      <div class="m-big">27.6%</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">NOPAT $2,078M<br>Capital Inv. $7,535M</div>
+      <div class="m-ctx">vs WACC ~12% → Crea valor ✓</div>
+    </div>
+    <div class="card" style="text-align:center;border-color:rgba(33,208,122,0.3);">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">ROE 2024</div>
+      <div class="m-big" style="color:var(--green)">43.9%</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">Net Income $1,911M<br>Equity $4,351M</div>
+      <div class="m-ctx">Altísimo — efecto leverage</div>
+    </div>
+    <div class="card" style="text-align:center;border-color:rgba(88,166,255,0.3);">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;">Spread de Valor</div>
+      <div class="m-big" style="color:var(--blue)">+15.6%</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:6px;">ROIC − WACC<br>27.6% − 12%</div>
+      <div class="m-ctx">$1,175M de EVA generado</div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="formula">
+      ROIC = <span class="v">NOPAT / Capital Invertido</span><br>
+      NOPAT = <span class="v">EBIT × (1 − Tax Rate)</span><br>
+      = $2,631M × (1 − 0.21) = <span style="color:var(--green);">$2,078M</span>
+    </div>
+    <div class="disc">
+      <div class="disc-lbl">💬 Ejercicio mental</div>
+      <p>Si el Capital Invertido en 2024 creció +61% (de $4,674M a $7,535M), ¿esperarían que el ROIC suba o baje? En la práctica cayó levemente vs 2023 (era ~31%) — MELI está invirtiendo capital muy rápido en Fintech. <strong>¿Creen que es buena decisión?</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 17: Q5 ====== -->
+<div class="slide" id="s17">
+  <div class="badge">Pregunta 5 · Cash Flow</div>
+  <div class="slide-title">¿Cuánto <span class="y">cash</span> generé?</div>
+  <div class="slide-sub">El cash flow es la "verdad" financiera — las utilidades son una opinión, el cash es un hecho</div>
+  <div class="g2">
+    <div>
+      <table>
+        <thead><tr><th>Componente</th><th>2022</th><th>2023</th><th>2024</th></tr></thead>
+        <tbody>
+          <tr><td>Net Income</td><td>482</td><td>987</td><td>1,911</td></tr>
+          <tr><td>+ D&amp;A</td><td>403</td><td>524</td><td>617</td></tr>
+          <tr><td>+ Provision Bad Debts</td><td>1,073</td><td>1,050</td><td>1,858</td></tr>
+          <tr><td>± Working Capital changes</td><td>982</td><td>2,579</td><td>3,532</td></tr>
+          <tr class="hl"><td>Cash from Operations (CFO)</td><td>2,940</td><td>5,140</td><td>7,918</td></tr>
+          <tr><td>− Capital Expenditure (Capex)</td><td>(455)</td><td>(509)</td><td>(860)</td></tr>
+          <tr class="hl"><td>Free Cash Flow (FCF)</td><td>2,485</td><td>4,631</td><td>7,058</td></tr>
+          <tr><td>Net Loans Originated</td><td>(1,701)</td><td>(2,047)</td><td>(4,688)</td></tr>
+          <tr><td>Net Change in Cash</td><td>(285)</td><td>485</td><td>851</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <div class="ch-wrap" style="height:200px;"><canvas id="chartCFO"></canvas></div>
+      <div class="card" style="margin-top:12px;border-color:rgba(255,230,0,0.2);">
+        <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:6px;">¿Qué hace MELI con el FCF?</div>
+        <div style="font-size:12px;line-height:1.6;color:var(--text);">
+          → Origina $4.7B en préstamos (Mercado Pago)<br>
+          → Invierte $860M en CAPEX (logística, tech)<br>
+          → Emite/paga deuda financiera<br>
+          → <span style="color:var(--muted);">No paga dividendos — reinvierte todo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 18: VEREDICTO ====== -->
+<div class="slide" id="s18">
+  <div class="badge">Veredicto Final</div>
+  <div class="slide-title">¿Invertís en <span class="y">MELI</span>?</div>
+  <div class="slide-sub">Volvemos a la pregunta inicial — ahora con el framework completo</div>
+  <div class="g2" style="margin-bottom:14px;">
+    <div class="card" style="border-color:rgba(33,208,122,0.3);">
+      <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:12px;">✅ Señales positivas</div>
+      <div style="font-size:13px;line-height:1.8;">
+        • Revenue +37.5% YoY en 2024<br>
+        • Net Income +93.6% — la rentabilidad escala<br>
+        • ROIC 27.6% >> WACC 12% → Crea valor<br>
+        • CFO $7.9B — generación de caja robusta<br>
+        • ROE 43.9% — excelente retorno al accionista<br>
+        • Ecosistema integrado con barreras de entrada altas
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(248,81,73,0.3);">
+      <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:12px;">⚠️ Riesgos a monitorear</div>
+      <div style="font-size:13px;line-height:1.8;">
+        • Gross Margin comprimido (52.7%) por mix Fintech<br>
+        • Capital Invertido +61% — crecimiento agresivo en créditos<br>
+        • Exposición a Argentina — riesgo cambiario/regulatorio<br>
+        • Provision for Bad Debts $1.9B (9% de ventas)<br>
+        • Competencia de Amazon en México<br>
+        • Endeudamiento creciente ($6.9B deuda)
+      </div>
+    </div>
+  </div>
+  <div class="card" style="border-color:rgba(255,230,0,0.3);background:rgba(255,230,0,0.03);">
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="font-size:40px;">🎯</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--yellow);margin-bottom:4px;">La decisión de inversión</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.5;">El análisis de performance no dice "comprá" o "vendé" — dice si el negocio <em>crea valor</em>. MELI claramente lo hace (ROIC >> WACC). Si la acción cotiza a un precio que ya descuenta todo este crecimiento, la decisión puede ser diferente. <strong>El análisis fundamental + el precio de entrada = la decisión final.</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="disc" style="margin-top:12px;">
+    <div class="disc-lbl">💬 Debate final — 5 minutos</div>
+    <p>¿Cambió su respuesta inicial? ¿Qué información fue la más determinante? ¿Qué pregunta adicional le harían al management de MELI antes de invertir?</p>
+  </div>
+</div>
+
+<!-- ====== SLIDE 19: MARGIN CHART SLIDE ====== -->
+<div class="slide" id="s19">
+  <div class="badge">Bonus · Evolución de Márgenes</div>
+  <div class="slide-title">Evolución de <span class="y">márgenes</span> 2020–2024</div>
+  <div class="slide-sub">La historia de la rentabilidad de MELI en perspectiva · % sobre ventas</div>
+  <div class="ch-wrap" style="height:320px;"><canvas id="chartMargins"></canvas></div>
+  <div class="g3" style="margin-top:14px;">
+    <div class="card" style="text-align:center;">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Gross Margin 2024</div>
+      <div style="font-size:28px;font-weight:800;color:var(--yellow);">52.7%</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">EBIT Margin 2024</div>
+      <div style="font-size:28px;font-weight:800;color:var(--blue);">12.7%</div>
+    </div>
+    <div class="card" style="text-align:center;">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Net Margin 2024</div>
+      <div style="font-size:28px;font-weight:800;color:var(--green);">9.2%</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SLIDE 20: CIERRE ====== -->
+<div class="slide slide-cover" id="s20">
+  <div style="text-align:center;max-width:700px;margin:auto;">
+    <div style="font-size:56px;margin-bottom:20px;">🎓</div>
+    <div class="cover-title" style="font-size:38px;">Resumen del framework</div>
+    <div style="margin:24px 0;display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left;">
+      <div class="card"><span style="color:var(--yellow);font-weight:700;">θ = R/R</span> — El inversor maximiza retorno sobre riesgo</div>
+      <div class="card"><span style="color:var(--yellow);font-weight:700;">Visión Financiera</span> — Activo Neto = Capital Invertido</div>
+      <div class="card"><span style="color:var(--yellow);font-weight:700;">AV</span> — Estructura y proporciones. <span style="color:var(--yellow);font-weight:700;">AH</span> — Tendencias</div>
+      <div class="card"><span style="color:var(--yellow);font-weight:700;">ROIC vs WACC</span> — La verdadera medida de creación de valor</div>
+      <div class="card"><span style="color:var(--yellow);font-weight:700;">Las 5 preguntas</span> — Framework completo de performance</div>
+      <div class="card"><span style="color:var(--yellow);font-weight:700;">MELI 2024</span> — ROIC 27.6%, ROE 43.9%, FCF $7B → Crea valor ✓</div>
+    </div>
+    <div style="margin-top:20px;font-size:14px;color:var(--muted);">Próximo paso: completar la Hoja de Ruta en el Excel con los datos de Capital IQ</div>
+    <div style="margin-top:28px;font-size:28px;font-weight:800;color:var(--yellow);">¡Muchas gracias!</div>
+  </div>
+</div>
+
+</div><!-- end #slides -->
+
+<!-- CONTROLS -->
+<div id="controls">
+  <button class="btn-nav" id="btnPrev" onclick="prevSlide()" disabled>← Anterior</button>
+  <div id="slide-dots"></div>
+  <button class="btn-nav" id="btnNext" onclick="nextSlide()">Siguiente →</button>
+</div>
+
+<script>
+// ============================================================
+// SLIDE NAVIGATION
+// ============================================================
+const TOTAL = 21;
+let cur = 0;
+let timerInterval = null, timerSec = 0, timerRunning = false;
+
+const slides = document.querySelectorAll('.slide');
+const dots = document.getElementById('slide-dots');
+const navSec = document.getElementById('nav-section');
+const navCount = document.getElementById('nav-counter');
+const prog = document.getElementById('progress-bar');
+
+const SECTIONS = [
+  '','Introducción','El Negocio','El Negocio','El Negocio','El Negocio',
+  'Lógica del Inversor','Lógica del Inversor',
+  'Visión Financiera','Visión Financiera',
+  'AV & AH','AV & AH','AV & AH',
+  'Las 5 Preguntas','Las 5 Preguntas','Las 5 Preguntas','Las 5 Preguntas','Las 5 Preguntas',
+  'Veredicto','Bonus','Cierre'
+];
+
+// Build dots
+for(let i=0;i<TOTAL;i++){
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>goTo(i);
+  dots.appendChild(d);
+}
+
+function goTo(n){
+  if(n<0||n>=TOTAL)return;
+  slides[cur].classList.remove('active');
+  slides[cur].classList.add('exit');
+  setTimeout(()=>slides[cur<n?cur:n].classList.remove('exit'),400);
+  cur=n;
+  slides[cur].classList.add('active');
+  document.querySelectorAll('.dot').forEach((d,i)=>{d.className='dot'+(i===cur?' active':'');});
+  navSec.textContent=SECTIONS[cur]||'';
+  navCount.textContent=(cur+1)+' / '+TOTAL;
+  prog.style.width=((cur/(TOTAL-1))*100)+'%';
+  document.getElementById('btnPrev').disabled=cur===0;
+  document.getElementById('btnNext').disabled=cur===TOTAL-1;
+  onSlideEnter(cur);
+}
+function nextSlide(){goTo(cur+1);}
+function prevSlide(){goTo(cur-1);}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')nextSlide();
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')prevSlide();
+});
+
+// ============================================================
+// TIMER
+// ============================================================
+function toggleTimer(){
+  if(!timerRunning){
+    timerInterval=setInterval(()=>{
+      timerSec++;
+      const m=Math.floor(timerSec/60),s=timerSec%60;
+      const rm=Math.floor((5400-timerSec)/60),rs=(5400-timerSec)%60;
+      document.getElementById('timer-display').textContent=
+        String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+' / 90:00';
+      if(timerSec>=5400){clearInterval(timerInterval);timerRunning=false;}
+    },1000);
+    timerRunning=true;
+    document.getElementById('timer-btn').textContent='⏸ Pausar';
+  } else {
+    clearInterval(timerInterval);
+    timerRunning=false;
+    document.getElementById('timer-btn').textContent='▶ Reanudar';
+  }
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+let chartsInit={};
+function onSlideEnter(n){
+  if(n===3&&!chartsInit.revenue)initRevenueChart();
+  if(n===15&&!chartsInit.ni)initNIChart();
+  if(n===17&&!chartsInit.cfo)initCFOChart();
+  if(n===19&&!chartsInit.margins)initMarginsChart();
+  if(n===3)animateKPIs();
+}
+
+const chartDefaults={
+  color:'rgba(230,237,243,0.8)',
+  borderColor:'rgba(48,54,61,1)',
+  plugins:{legend:{labels:{color:'rgba(139,148,158,1)',font:{size:11}}},tooltip:{backgroundColor:'rgba(22,27,39,0.95)',borderColor:'rgba(48,54,61,1)',borderWidth:1}},
+  scales:{
+    x:{ticks:{color:'rgba(139,148,158,1)',font:{size:11}},grid:{color:'rgba(48,54,61,0.5)'}},
+    y:{ticks:{color:'rgba(139,148,158,1)',font:{size:11}},grid:{color:'rgba(48,54,61,0.5)'}}
+  }
+};
+
+function initRevenueChart(){
+  chartsInit.revenue=true;
+  const ctx=document.getElementById('chartRevenue').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['2020','2021','2022','2023','2024'],
+      datasets:[
+        {label:'Commerce',data:[2300,3900,5900,8600,12159],backgroundColor:'rgba(255,230,0,0.7)',borderRadius:4},
+        {label:'Fintech',data:[1674,3169,4880,6507,8618],backgroundColor:'rgba(33,208,122,0.6)',borderRadius:4}
+      ]
+    },
+    options:{...chartDefaults,responsive:true,maintainAspectRatio:false,
+      plugins:{...chartDefaults.plugins,title:{display:true,text:'Total Revenue USD millones',color:'rgba(139,148,158,1)',font:{size:11}}},
+      scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,stacked:false},x:{...chartDefaults.scales.x,stacked:false}}
+    }
+  });
+}
+
+function initNIChart(){
+  chartsInit.ni=true;
+  const ctx=document.getElementById('chartNI').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['2020','2021','2022','2023','2024'],
+      datasets:[{
+        label:'Net Income ($M)',
+        data:[-1,83,482,987,1911],
+        backgroundColor:d=>d.raw<0?'rgba(248,81,73,0.6)':'rgba(33,208,122,0.6)',
+        borderRadius:4
+      }]
+    },
+    options:{...chartDefaults,responsive:true,maintainAspectRatio:false}
+  });
+}
+
+function initCFOChart(){
+  chartsInit.cfo=true;
+  const ctx=document.getElementById('chartCFO').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['2021','2022','2023','2024'],
+      datasets:[
+        {label:'CFO',data:[965,2940,5140,7918],backgroundColor:'rgba(255,230,0,0.65)',borderRadius:4},
+        {label:'CAPEX',data:[-573,-455,-509,-860],backgroundColor:'rgba(248,81,73,0.5)',borderRadius:4}
+      ]
+    },
+    options:{...chartDefaults,responsive:true,maintainAspectRatio:false}
+  });
+}
+
+function initMarginsChart(){
+  chartsInit.margins=true;
+  const ctx=document.getElementById('chartMargins').getContext('2d');
+  new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:['2020','2021','2022','2023','2024'],
+      datasets:[
+        {label:'Gross Margin %',data:[51.2,50.6,55.8,58.0,52.7],borderColor:'rgba(255,230,0,0.8)',backgroundColor:'rgba(255,230,0,0.08)',tension:.3,borderWidth:2,pointRadius:4},
+        {label:'EBIT Margin %',data:[3.2,6.4,10.0,14.6,12.7],borderColor:'rgba(88,166,255,0.8)',backgroundColor:'rgba(88,166,255,0.05)',tension:.3,borderWidth:2,pointRadius:4},
+        {label:'Net Margin %',data:[-0.03,1.2,4.5,6.5,9.2],borderColor:'rgba(33,208,122,0.8)',backgroundColor:'rgba(33,208,122,0.05)',tension:.3,borderWidth:2,pointRadius:4}
+      ]
+    },
+    options:{...chartDefaults,responsive:true,maintainAspectRatio:false}
+  });
+}
+
+// ============================================================
+// KPI COUNTERS
+// ============================================================
+function animateKPIs(){
+  const targets=[
+    {id:'k1',val:190.2,suffix:'M',dec:1},
+    {id:'k2',val:97,suffix:'/seg',dec:0},
+    {id:'k3',val:360,suffix:'/seg',dec:0},
+    {id:'k4',val:196.7,suffix:'B',prefix:'$',dec:1},
+    {id:'k5',val:51.5,suffix:'B',prefix:'$',dec:1},
+    {id:'k6',val:84207,suffix:'',dec:0}
+  ];
+  targets.forEach(t=>{
+    const el=document.getElementById(t.id);
+    if(!el||el.dataset.animated)return;
+    el.dataset.animated='1';
+    let start=0,dur=1500,step=16;
+    const steps=dur/step;
+    let i=0;
+    const iv=setInterval(()=>{
+      i++;
+      const v=t.val*(i/steps);
+      const disp=(t.prefix||'')+(t.dec>0?v.toFixed(t.dec):Math.floor(v).toLocaleString())+t.suffix;
+      el.textContent=disp;
+      if(i>=steps){el.textContent=(t.prefix||'')+(t.dec>0?t.val.toFixed(t.dec):t.val.toLocaleString())+t.suffix;clearInterval(iv);}
+    },step);
+  });
+}
+
+// ============================================================
+// CLASSIFICATION EXERCISE
+// ============================================================
+const CLASSIFY_ANSWERS=['AF','AO','AO','AO','AO','AO','AF','PO','PO','PO','PF','PF'];
+let classifyState=new Array(12).fill(null);
+
+function classify(idx,val){
+  classifyState[idx]=val;
+  const item=document.getElementById('ci'+idx);
+  item.querySelectorAll('.cl-btn').forEach(b=>{
+    b.classList.remove('sel');
+    if(b.textContent===val)b.classList.add('sel');
+  });
+}
+
+function checkClassify(){
+  let correct=0;
+  classifyState.forEach((v,i)=>{
+    if(!v)return;
+    const item=document.getElementById('ci'+i);
+    const isOk=v===CLASSIFY_ANSWERS[i];
+    if(isOk)correct++;
+    item.querySelectorAll('.cl-btn').forEach(b=>{
+      b.classList.remove('sel','ok','err');
+      if(b.textContent===v){b.classList.add(isOk?'ok':'err');}
+    });
+  });
+  const filled=classifyState.filter(x=>x).length;
+  document.getElementById('cl-score').innerHTML=
+    '<div class="disc" style="margin-top:0;"><p><strong>'+correct+' / '+filled+'</strong> correctas de las '+filled+' respondidas. '+(filled<12?'Completá las restantes.':'')+'</p></div>';
+  document.getElementById('cl-score').classList.add('show');
+}
+
+function revealClassify(){
+  CLASSIFY_ANSWERS.forEach((ans,i)=>{
+    const item=document.getElementById('ci'+i);
+    item.querySelectorAll('.cl-btn').forEach(b=>{
+      b.classList.remove('sel','ok','err');
+      if(b.textContent===ans)b.classList.add('ok');
+    });
+  });
+}
+
+// ============================================================
+// AV EXERCISE
+// ============================================================
+const AV_ANSWERS={1:47.3,2:52.7,3:15.2,4:8.9,5:9.3,6:12.7,7:9.2};
+function checkAVInput(n,correct){
+  const el=document.getElementById('av'+n);
+  const val=parseFloat(el.value.replace('%','').replace(',','.'));
+  el.classList.remove('ok','err');
+  if(isNaN(val))return;
+  el.classList.add(Math.abs(val-correct)<0.5?'ok':'err');
+}
+function checkAllAV(){Object.entries(AV_ANSWERS).forEach(([k,v])=>checkAVInput(k,v));}
+function revealAV(){
+  Object.entries(AV_ANSWERS).forEach(([k,v])=>{
+    const el=document.getElementById('av'+k);
+    el.value=v+'%';el.classList.remove('err');el.classList.add('ok');
+  });
+  document.getElementById('av-insight').classList.add('show');
+}
+
+// ============================================================
+// AH EXERCISE
+// ============================================================
+const AH_ANSWERS={1:37.5,2:25.0,3:19.2,4:93.6,5:43.1,6:41.7};
+function checkAHInput(n,correct){
+  const el=document.getElementById('ah'+n);
+  const raw=el.value.replace('%','').replace('+','').replace(',','.');
+  const val=parseFloat(raw);
+  el.classList.remove('ok','err');
+  if(isNaN(val))return;
+  el.classList.add(Math.abs(val-correct)<0.6?'ok':'err');
+}
+function checkAllAH(){Object.entries(AH_ANSWERS).forEach(([k,v])=>checkAHInput(k,v));}
+function revealAH(){
+  Object.entries(AH_ANSWERS).forEach(([k,v])=>{
+    const el=document.getElementById('ah'+k);
+    el.value='+'+v+'%';el.classList.remove('err');el.classList.add('ok');
+  });
+  document.getElementById('ah-insight').classList.add('show');
+}
+
+// Init
+goTo(0);
+</script>
+</body>
+</html>
